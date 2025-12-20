@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  medicamentos:
+    build: .
+    container_name: sistema-medicamentos
+    restart: always
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./database.db:/app/database.db

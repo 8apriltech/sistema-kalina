@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Medicamentos Kalina</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #020617;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            background: #020617;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        img {
+            max-width: 180px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: #e5e7eb;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-cadastro {
+            background: #38bdf8;
+            color: #020617;
+        }
+
+        .btn-dashboard {
+            background: #22c55e;
+            color: #020617;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://i.ibb.co/jv0PkJyN/3.png" alt="Kalina / 8April Tech">
+
+    <h1>
+        Bem-vindo ao <br>
+        <strong>Sistema Kalina ™ de Controle de Entrega de Medicamentos! </strong><br>
+        </h1>
+
+    <button class="btn-cadastro" onclick="location.href='/cadastrar-paciente'">
+        Cadastrar Paciente
+    </button>
+
+    <button class="btn-dashboard" onclick="location.href='/dashboard-view'">
+        Dashboard
+    </button>
+</div>
+
+</body>
+</html>

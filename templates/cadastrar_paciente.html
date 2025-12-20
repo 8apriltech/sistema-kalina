@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Paciente</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #020617;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #020617;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        img {
+            max-width: 160px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 25px;
+            color: #e5e7eb;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 6px;
+            color: #cbd5f5;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #38bdf8;
+            color: #020617;
+        }
+
+        button:hover {
+            background: #0ea5e9;
+        }
+
+        .voltar {
+            margin-top: 15px;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .voltar:hover {
+            color: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://i.ibb.co/jv0PkJyN/3.png" alt="Kalina / 8April Tech">
+
+    <h1>Cadastrar Paciente</h1>
+
+    <label>Nome completo</label>
+    <input type="text" id="nome" placeholder="Ex: Maria da Silva">
+
+    <label>Data de retirada</label>
+    <input type="date" id="dataPrevista">
+
+    <button onclick="salvar()">Salvar</button>
+
+    <button class="voltar" onclick="location.href='/'">
+        Voltar
+    </button>
+</div>
+
+<script>
+function salvar() {
+    const nome = document.getElementById("nome").value.trim();
+    const dataPrevista = document.getElementById("dataPrevista").value;
+
+    if (!nome || !dataPrevista) {
+        alert("Preencha todos os campos");
+        return;
+    }
+
+    const hoje = new Date();
+    const mes = hoje.getMonth() + 1;
+    const ano = hoje.getFullYear();
+
+    // 1️⃣ cria paciente
+    fetch("/pacientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            nome: nome,
+            ativo: true
+        })
+    })
+    .then(res => res.json())
+    .then(paciente => {
+        // 2️⃣ cria retirada
+        return fetch("/retiradas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                paciente_id: paciente.id,
+                ano: ano,
+                mes: mes,
+                data_prevista: dataPrevista
+            })
+        });
+    })
+    .then(() => {
+        // 3️⃣ vai pro dashboard
+        window.location.href = "/dashboard-view";
+    })
+    .catch(() => {
+        alert("Erro ao cadastrar paciente");
+    });
+}
+</script>
+
+</body>
+</html>
