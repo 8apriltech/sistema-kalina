@@ -6,6 +6,10 @@ from routes.dashboard import router as dashboard_router
 from routes.pacientes import router as pacientes_router
 from routes.retiradas import router as retiradas_router
 
+from database import engine, Base
+
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
 
 # Templates
