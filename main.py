@@ -8,6 +8,11 @@ from routes.retiradas import router as retiradas_router
 
 from database import engine, Base
 
+# 👇 IMPORTA OS MODELS (ESSENCIAL)
+from models.paciente import Paciente
+from models.retirada import Retirada  # se existir
+
+# 👇 AGORA SIM AS TABELAS SÃO CRIADAS
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
