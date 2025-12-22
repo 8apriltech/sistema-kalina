@@ -115,19 +115,22 @@ function salvar() {
     const mes = hoje.getMonth() + 1;
     const ano = hoje.getFullYear();
 
-    // 1️⃣ cria paciente
-    fetch("/pacientes", {
+    // 1️⃣ cria paciente (URL COM / NO FINAL)
+    fetch("/pacientes/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             nome: nome,
-            ativo: true
+            observacao: null
         })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("Erro ao criar paciente");
+        return res.json();
+    })
     .then(paciente => {
-        // 2️⃣ cria retirada
-        return fetch("/retiradas", {
+        // 2️⃣ define retirada (ROTA CORRETA)
+        return fetch("/retiradas/definir-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -138,11 +141,13 @@ function salvar() {
             })
         });
     })
-    .then(() => {
+    .then(res => {
+        if (!res.ok) throw new Error("Erro ao definir retirada");
         // 3️⃣ vai pro dashboard
         window.location.href = "/dashboard-view";
     })
-    .catch(() => {
+    .catch(err => {
+        console.error(err);
         alert("Erro ao cadastrar paciente");
     });
 }
