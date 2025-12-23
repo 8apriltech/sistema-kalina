@@ -25,11 +25,6 @@
             text-align: center;
         }
 
-        img {
-            max-width: 160px;
-            margin-bottom: 20px;
-        }
-
         h1 {
             font-size: 22px;
             margin-bottom: 25px;
@@ -75,34 +70,25 @@
             color: #94a3b8;
             font-size: 14px;
         }
-
-        .voltar:hover {
-            color: #e5e7eb;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <img src="https://i.ibb.co/jv0PkJyN/3.png" alt="Kalina / 8April Tech">
-
     <h1>Cadastrar Paciente</h1>
 
     <label>Nome completo</label>
-    <input type="text" id="nome" placeholder="Ex: Maria da Silva">
+    <input type="text" id="nome">
 
     <label>Data de retirada</label>
     <input type="date" id="dataPrevista">
 
-    <button onclick="salvar()">Salvar</button>
-
-    <button class="voltar" onclick="location.href='/'">
-        Voltar
-    </button>
+    <button type="button" onclick="salvar()">Salvar</button>
+    <button class="voltar" onclick="location.href='/dashboard-view'">Voltar</button>
 </div>
 
 <script>
-function salvar() {
+async function salvar() {
     const nome = document.getElementById("nome").value.trim();
     const dataPrevista = document.getElementById("dataPrevista").value;
 
@@ -115,41 +101,35 @@ function salvar() {
     const mes = hoje.getMonth() + 1;
     const ano = hoje.getFullYear();
 
-    // 1️⃣ cria paciente (URL COM / NO FINAL)
-    fetch("/pacientes/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            nome: nome,
-            observacao: null
-        })
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Erro ao criar paciente");
-        return res.json();
-    })
-    .then(paciente => {
-        // 2️⃣ define retirada (ROTA CORRETA)
-        return fetch("/retiradas/definir-data", {
+    try {
+        const pacienteResp = await fetch("/pacientes/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome, observacao: null })
+        });
+
+        if (!pacienteResp.ok) throw new Error();
+
+        const paciente = await pacienteResp.json();
+
+        const retiradaResp = await fetch("/retiradas/definir-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 paciente_id: paciente.id,
-                ano: ano,
-                mes: mes,
+                ano,
+                mes,
                 data_prevista: dataPrevista
             })
         });
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Erro ao definir retirada");
-        // 3️⃣ vai pro dashboard
+
+        if (!retiradaResp.ok) throw new Error();
+
         window.location.href = "/dashboard-view";
-    })
-    .catch(err => {
-        console.error(err);
+
+    } catch {
         alert("Erro ao cadastrar paciente");
-    });
+    }
 }
 </script>
 

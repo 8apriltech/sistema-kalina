@@ -2,269 +2,157 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Controle de Medicamentos</title>
+    <title>Dashboard</title>
 
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #020617;
-            color: #f8fafc;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
             color: #e5e7eb;
+            padding: 30px;
         }
 
-        .meses {
+        h2 {
             text-align: center;
             margin-bottom: 20px;
-        }
-
-        .meses button {
-            margin: 3px;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: #1e293b;
-            color: #f8fafc;
-        }
-
-        .meses button.ativo {
-    background: #38bdf8;
-    color: #020617;
-    font-weight: bold;
-    box-shadow: 0 0 0 2px #0ea5e9 inset;
-}
-
-
-        .meses button:hover {
-            background: #334155;
         }
 
         table {
             width: 100%;
+            max-width: 900px;
+            margin: auto;
             border-collapse: collapse;
-            background: #020617;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #334155;
+            text-align: center;
         }
 
         th {
-            padding: 12px;
-            border-bottom: 2px solid #334155;
-            color: #cbd5f5;
-            text-align: left;
+            color: #93c5fd;
         }
 
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #1e293b;
-            color: #f8fafc;
+        button {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
         }
 
-        /* Status */
-        .verde { color: #22c55e; font-weight: bold; }
-        .vermelho { color: #ef4444; font-weight: bold; }
-        .azul { color: #38bdf8; font-weight: bold; }
-        .cinza { color: #94a3b8; font-weight: bold; }
+        .excluir {
+            background: #ef4444;
+            color: white;
+        }
 
-        /* Botões */
-        button.marcar {
-            padding: 6px 12px;
+        .salvar {
             background: #22c55e;
             color: #020617;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
         }
 
-        button.marcar:hover {
-            background: #16a34a;
-        }
-
-        input[type="date"] {
-            padding: 6px;
-            border-radius: 6px;
-            border: none;
-            margin-right: 6px;
+        .top {
+            text-align: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
 
-<div style="margin-bottom:20px;">
-    <button onclick="location.href='/'"
-        style="
-            padding: 8px 14px;
-            border-radius: 6px;
-            border: none;
-            background: #1e293b;
-            color: #f8fafc;
-            cursor: pointer;
-        ">
-        ⬅ Home
-    </button>
-</div>
+<h2>Pacientes</h2>
 
-<h1>Controle de Entrega de Medicamentos</h1>
-
-<div id="contador-atrasados"
-     style="
-        text-align:center;
-        margin-bottom:15px;
-        font-size:18px;
-        font-weight:bold;
-        color:#ef4444;
-        display:none;
-     ">
-</div>
-
-
-<div class="meses">
-    <button onclick="carregar(1)">Jan</button>
-    <button onclick="carregar(2)">Fev</button>
-    <button onclick="carregar(3)">Mar</button>
-    <button onclick="carregar(4)">Abr</button>
-    <button onclick="carregar(5)">Mai</button>
-    <button onclick="carregar(6)">Jun</button>
-    <button onclick="carregar(7)">Jul</button>
-    <button onclick="carregar(8)">Ago</button>
-    <button onclick="carregar(9)">Set</button>
-    <button onclick="carregar(10)">Out</button>
-    <button onclick="carregar(11)">Nov</button>
-    <button onclick="carregar(12)">Dez</button>
+<div class="top">
+    <button onclick="location.href='/cadastrar-paciente'">Novo Paciente</button>
 </div>
 
 <table>
     <thead>
         <tr>
-            <th>Paciente</th>
-            <th>Data de Retirada</th>
-            <th>Status</th>
+            <th>Nome</th>
+            <th>Data prevista</th>
             <th>Ações</th>
         </tr>
     </thead>
-    <tbody id="tabela"></tbody>
+    <tbody id="tbody"></tbody>
 </table>
 
 <script>
-const anoAtual = new Date().getFullYear();
-let mesAtual = new Date().getMonth() + 1;
+async function carregar() {
+    const resp = await fetch("/pacientes/");
+    const pacientes = await resp.json();
 
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
 
-function carregar(mes) {
-    mesAtual = mes;
+    pacientes.forEach(p => {
+        const tr = document.createElement("tr");
 
-     // remove destaque de todos os meses
-    document.querySelectorAll(".meses button")
-        .forEach(btn => btn.classList.remove("ativo"));
+        tr.innerHTML = `
+            <td>${p.nome}</td>
+            <td>
+                <input type="date" id="data-${p.id}" value="${p.data_prevista || ''}">
+            </td>
+            <td>
+                <button class="salvar" type="button" onclick="salvar(${p.id})">Salvar</button>
+                <button class="excluir" type="button" onclick="excluir(${p.id})">Excluir</button>
+            </td>
+        `;
 
-    // adiciona destaque no mês selecionado
-    document.querySelector(`.meses button:nth-child(${mes})`)
-        .classList.add("ativo");
-
-    fetch(`/dashboard/?ano=${anoAtual}&mes=${mes}`)
-        .then(res => res.json())
-        .then(data => {
-            const contador = document.getElementById("contador-atrasados");
-
-        if (data.total_atrasados > 0) {
-            contador.innerText = `⚠️ ${data.total_atrasados} paciente(s) atrasado(s) neste mês`;
-            contador.style.display = "block";
-        } else {
-             contador.style.display = "none";
+        tbody.appendChild(tr);
+    });
 }
 
-            const tbody = document.getElementById("tabela");
-            tbody.innerHTML = "";
+async function excluir(id) {
+    if (!confirm("Excluir paciente?")) return;
 
-            data.dados.forEach(item => {
-                const tr = document.createElement("tr");
+    const resp = await fetch(`/pacientes/${id}`, {
+        method: "DELETE"
+    });
 
-                tr.innerHTML = `
-                    <td>${item.nome}</td>
-
-                    <td>
-                        ${
-                            item.status === "Sem Registro"
-                            ? `
-                                <input type="date" id="data-${item.paciente_id}">
-                                <button class="marcar"
-                                    onclick="salvarData(${item.paciente_id}, ${mes})">
-                                    Salvar
-                                </button>
-                              `
-                            : item.data_prevista ?? "-"
-                        }
-                    </td>
-
-                    <td class="${item.cor}">${item.status}</td>
-
-                    <td>
-    ${
-        item.status !== "OK" && item.status !== "Sem Registro"
-        ? `<button class="marcar"
-            onclick="marcar(${item.retirada_id}, ${mes})">
-            OK
-          </button>`
-        : ""
-    }
-
-   <button class="marcar"
-    style="background:#ef4444; color:#ffffff; margin-left:6px;"
-    onclick="excluirPaciente(${item.paciente_id})">
-    Excluir
-</button>
-
-</td>
-
-                `;
-
-                tbody.appendChild(tr);
-            });
-        });
-}
-
-function salvarData(pacienteId, mes) {
-    const input = document.getElementById(`data-${pacienteId}`);
-    if (!input || !input.value) {
-        alert("Informe a data de retirada");
+    if (!resp.ok) {
+        alert("Erro ao excluir");
         return;
     }
 
-    fetch(`/retiradas/definir-data?paciente_id=${pacienteId}&ano=${anoAtual}&mes=${mes}&data_prevista=${input.value}`, {
-        method: "POST"
-    })
-    .then(() => carregar(mesAtual));
+    // 🔥 RECARREGA A LISTA
+    await carregar();
 }
 
-function marcar(retiradaId, mes) {
-    if (!retiradaId) return;
+async function salvar(id) {
+    const input = document.getElementById(`data-${id}`);
+    const data = input.value;
 
-    fetch(`/retiradas/${retiradaId}/marcar`, { method: "PUT" })
-        .then(() => carregar(mesAtual));
+    if (!data) {
+        alert("Informe a data");
+        return;
+    }
+
+    const hoje = new Date();
+    const mes = hoje.getMonth() + 1;
+    const ano = hoje.getFullYear();
+
+    const resp = await fetch("/retiradas/definir-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            paciente_id: id,
+            ano,
+            mes,
+            data_prevista: data
+        })
+    });
+
+    if (!resp.ok) {
+        alert("Erro ao salvar data");
+        return;
+    }
+
+    // 🔥 RECARREGA A LISTA
+    await carregar();
 }
 
-// carrega mês atual automaticamente
-carregar(new Date().getMonth() + 1);
-
-function excluirPaciente(pacienteId) {
-    if (!confirm("Tem certeza que deseja excluir este paciente?")) return;
-
-    fetch(`/pacientes/${pacienteId}`, {
-        method: "DELETE"
-    })
-    .then(() => carregar(mesAtual));
-}
-
-
-
+// carrega ao abrir
+carregar();
 </script>
 
 </body>
