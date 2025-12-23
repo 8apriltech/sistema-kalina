@@ -18,12 +18,16 @@ def criar_retirada(db: Session, retirada: RetiradaMensal):
     db.refresh(retirada)
     return retirada
 
-def excluir_paciente(db: Session, paciente_id: int) -> bool:
+def excluir_paciente(db, paciente_id: int):
     paciente = db.query(Paciente).filter(Paciente.id == paciente_id).first()
 
     if not paciente:
         return False
 
-    paciente.ativo = False
+    db.query(RetiradaMensal).filter(
+        RetiradaMensal.paciente_id == paciente_id
+    ).delete()
+
+    db.delete(paciente)
     db.commit()
     return True

@@ -102,16 +102,32 @@ async function salvar() {
     const ano = hoje.getFullYear();
 
     try {
+        /* ---------- CRIA PACIENTE ---------- */
         const pacienteResp = await fetch("/pacientes/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome, observacao: null })
+            body: JSON.stringify({
+                nome,
+                observacao: null
+            })
         });
 
-        if (!pacienteResp.ok) throw new Error();
+        if (!pacienteResp.ok) {
+            console.error("Erro ao criar paciente:", pacienteResp.status);
+            alert("Erro ao criar paciente");
+            return;
+        }
 
-        const paciente = await pacienteResp.json();
+        let paciente;
+        try {
+            paciente = await pacienteResp.json();
+        } catch (err) {
+            console.error("Resposta inválida ao criar paciente", err);
+            alert("Erro ao criar paciente");
+            return;
+        }
 
+        /* ---------- DEFINE DATA DE RETIRADA ---------- */
         const retiradaResp = await fetch("/retiradas/definir-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -123,12 +139,18 @@ async function salvar() {
             })
         });
 
-        if (!retiradaResp.ok) throw new Error();
+        if (!retiradaResp.ok) {
+            console.error("Erro ao definir data de retirada:", retiradaResp.status);
+            alert("Erro ao definir data de retirada");
+            return;
+        }
 
+        /* ---------- SUCESSO ---------- */
         window.location.href = "/dashboard-view";
 
-    } catch {
-        alert("Erro ao cadastrar paciente");
+    } catch (err) {
+        console.error("Falha de rede ou erro inesperado", err);
+        alert("Erro inesperado ao cadastrar paciente");
     }
 }
 </script>

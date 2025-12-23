@@ -77,10 +77,8 @@
 </table>
 
 <script>
-async function carregar() {
-    const resp = await fetch("/pacientes/");
-    const pacientes = await resp.json();
 
+function renderizarPacientes(pacientes) {
     const tbody = document.getElementById("tbody");
     tbody.innerHTML = "";
 
@@ -90,17 +88,56 @@ async function carregar() {
         tr.innerHTML = `
             <td>${p.nome}</td>
             <td>
-                <input type="date" id="data-${p.id}" value="${p.data_prevista || ''}">
+                <input
+                    type="date"
+                    id="data-${p.id}"
+                    value="${p.data_prevista ?? ""}"
+                >
             </td>
             <td>
-                <button class="salvar" type="button" onclick="salvar(${p.id})">Salvar</button>
-                <button class="excluir" type="button" onclick="excluir(${p.id})">Excluir</button>
+                <button class="salvar" type="button" onclick="salvar(${p.id})">
+                    Salvar
+                </button>
+                <button class="excluir" type="button" onclick="excluir(${p.id})">
+                    Excluir
+                </button>
             </td>
         `;
 
         tbody.appendChild(tr);
     });
 }
+
+
+async function carregar() {
+    let resp;
+
+    try {
+        resp = await fetch("/pacientes/", {
+            cache: "no-store"
+        });
+    } catch (err) {
+        console.error("Falha de rede ao buscar pacientes", err);
+        return;
+    }
+
+    if (!resp.ok) {
+        console.error("Erro ao buscar pacientes:", resp.status);
+        return;
+    }
+
+    let pacientes;
+    try {
+        pacientes = await resp.json();
+    } catch (err) {
+        console.error("Resposta não é JSON válido", err);
+        return;
+    }
+
+    renderizarPacientes(pacientes);
+}
+
+
 
 async function excluir(id) {
     if (!confirm("Excluir paciente?")) return;
