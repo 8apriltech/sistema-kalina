@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
-from datetime import datetime, date
+from datetime import datetime
 
 from database import SessionLocal
-from models import RetiradaMensal
-from schemas import DefinirDataRequest
+from models.retiradas import RetiradaMensal
 
 router = APIRouter(prefix="/retiradas", tags=["Retiradas"])
 
@@ -18,26 +17,20 @@ def get_db():
 
 
 @router.post("/definir-data")
-def definir_data_prevista(
-    payload: DefinirDataRequest = Body(...),
-    db: Session = Depends(get_db)
-):
+def definir_data_prevista(payload: dict = Body(...), db: Session = Depends(get_db)):
     try:
         data_prevista = datetime.strptime(
-            payload.data_prevista, "%Y-%m-%d"
+            payload["data_prevista"], "%Y-%m-%d"
         ).date()
-    except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail="Formato de data inválido. Use YYYY-MM-DD."
-        )
+    except Exception:
+        raise HTTPException(400, "Data inválida")
 
     retirada = (
         db.query(RetiradaMensal)
         .filter(
-            RetiradaMensal.paciente_id == payload.paciente_id,
-            RetiradaMensal.ano == payload.ano,
-            RetiradaMensal.mes == payload.mes
+            RetiradaMensal.paciente_id == payload["paciente_id"],
+            RetiradaMensal.ano == payload["ano"],
+            RetiradaMensal.mes == payload["mes"],
         )
         .first()
     )
@@ -46,10 +39,10 @@ def definir_data_prevista(
         retirada.data_prevista = data_prevista
     else:
         retirada = RetiradaMensal(
-            paciente_id=payload.paciente_id,
-            ano=payload.ano,
-            mes=payload.mes,
-            data_prevista=data_prevista
+            paciente_id=payload["paciente_id"],
+            ano=payload["ano"],
+            mes=payload["mes"],
+            data_prevista=data_prevista,
         )
         db.add(retirada)
 
@@ -60,7 +53,8 @@ def definir_data_prevista(
 @router.put("/{retirada_id}/marcar")
 def marcar_retirada(
     retirada_id: int,
-    db: Session = Depends(get_db)
+    data_retirada: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
 ):
     retirada = (
         db.query(RetiradaMensal)
@@ -69,12 +63,14 @@ def marcar_retirada(
     )
 
     if not retirada:
-        raise HTTPException(
-            status_code=404,
-            detail="Retirada não encontrada"
-        )
+        raise HTTPException(404, "Retirada não encontrada")
 
-    retirada.data_retirada = date.today()
+    try:
+        retirada.data_retirada = datetime.strptime(
+            data_retirada, "%Y-%m-%d"
+        ).date()
+    except Exception:
+        raise HTTPException(400, "Data inválida")
+
     db.commit()
-
     return {"status": "ok"}

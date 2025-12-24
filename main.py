@@ -9,18 +9,12 @@ from routes.retiradas import router as retiradas_router
 from database import engine, Base
 from models import Paciente, RetiradaMensal
 
-from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
 # cria tabelas
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(redirect_slashes=False)
 
-# confia no Traefik / proxy
-app.add_middleware(
-    ProxyHeadersMiddleware,
-    trusted_hosts="*"
-)
 
 templates = Jinja2Templates(directory="templates")
 
