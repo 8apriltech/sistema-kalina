@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from datetime import date
 from typing import Optional
 
 class PacienteBase(BaseModel):
@@ -32,3 +31,12 @@ class RetiradaResponse(RetiradaBase):
 
     class Config:
         from_attributes = True
+
+        from pydantic import BaseModel
+from datetime import date
+
+class DefinirDataRequest(BaseModel):
+    paciente_id: int
+    ano: int
+    mes: int
+    data_prevista: str
