@@ -14,12 +14,12 @@
 
         h2 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         table {
             width: 100%;
-            max-width: 900px;
+            max-width: 1100px;
             margin: auto;
             border-collapse: collapse;
         }
@@ -35,10 +35,17 @@
         }
 
         button {
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 6px;
             border: none;
             cursor: pointer;
+            margin: 2px;
+            font-weight: bold;
+        }
+
+        .ok {
+            background: #22c55e;
+            color: #020617;
         }
 
         .excluir {
@@ -46,32 +53,134 @@
             color: white;
         }
 
-        .salvar {
-            background: #22c55e;
-            color: #020617;
+        .editar {
+            background: transparent;
+            color: #93c5fd;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
         }
 
-        .top {
-            text-align: center;
-            margin-bottom: 20px;
+        .editar:hover {
+            color: #60a5fa;
         }
+
+        input[type="date"], select {
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        .status.vermelho { color: #ef4444; font-weight: bold; }
+        .status.azul { color: #3b82f6; font-weight: bold; }
+        .status.verde { color: #22c55e; font-weight: bold; }
+        .status.cinza { color: #9ca3af; font-weight: bold; }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto 20px;
+            gap: 10px;
+        }
+
+        .top-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .cards {
+    max-width: 1100px;
+    margin: 0 auto 25px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+        }
+
+        .card {
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .card span {
+            display: block;
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .card strong {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .card.total strong {
+            color: #93c5fd;
+        }
+
+        .card.atraso strong {
+            color: #ef4444;
+        }
+
+        .card.prazo strong {
+            color: #3b82f6;
+        }
+
+
     </style>
 </head>
 <body>
 
-<h1 style="color:red">VERSÃO NOVA DO DASHBOARD</h1>
+<h2>Dashboard de Retiradas</h2>
 
-<h2>Pacientes</h2>
+<div class="cards">
+    <div class="card total">
+        <span>Total de Pacientes</span>
+        <strong id="card-total">0</strong>
+    </div>
+
+    <div class="card atraso">
+        <span>Em Atraso</span>
+        <strong id="card-atraso">0</strong>
+    </div>
+
+    <div class="card prazo">
+        <span>Dentro do Prazo</span>
+        <strong id="card-prazo">0</strong>
+    </div>
+</div>
+
 
 <div class="top">
-    <button onclick="location.href='/cadastrar-paciente'">Novo Paciente</button>
+    <div>
+        <button onclick="location.href='/'">← Voltar</button>
+    </div>
+
+    <div class="top-right">
+        <select id="ano"></select>
+        <select id="mes"></select>
+
+        <button onclick="location.href='/cadastrar-paciente'">
+            Novo Paciente
+        </button>
+    </div>
 </div>
 
 <table>
     <thead>
         <tr>
             <th>Nome</th>
-            <th>Data prevista</th>
+            <th>Data Prevista</th>
+            <th>Data Retirada</th>
+            <th>Status</th>
             <th>Ações</th>
         </tr>
     </thead>
@@ -80,118 +189,187 @@
 
 <script>
 
-function renderizarPacientes(pacientes) {
+function formatarDataBR(dataISO) {
+    if (!dataISO) return "-";
+    const [ano, mes, dia] = dataISO.split("-");
+    return `${dia}/${mes}/${ano}`;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const selectAno = document.getElementById("ano");
+    const selectMes = document.getElementById("mes");
     const tbody = document.getElementById("tbody");
-    tbody.innerHTML = "";
 
-    pacientes.forEach(p => {
+    /* ===== ANOS ===== */
+    [2024, 2025, 2026].forEach(a => {
+        const o = document.createElement("option");
+        o.value = a;
+        o.textContent = a;
+        selectAno.appendChild(o);
+    });
+
+    /* ===== MESES ===== */
+    [
+        "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+    ].forEach((m, i) => {
+        const o = document.createElement("option");
+        o.value = i + 1;
+        o.textContent = m;
+        selectMes.appendChild(o);
+    });
+
+    /* ===== MÊS ATUAL ===== */
+    const hoje = new Date();
+    selectAno.value = hoje.getFullYear();
+    selectMes.value = hoje.getMonth() + 1;
+
+    selectAno.addEventListener("change", carregar);
+    selectMes.addEventListener("change", carregar);
+
+    /* ===== FETCH ===== */
+    async function carregar() {
+        const resp = await fetch(
+            `/dashboard/?ano=${selectAno.value}&mes=${selectMes.value}`,
+            { cache: "no-store" }
+        );
+
+        if (!resp.ok) return;
+
+        const data = await resp.json();
+
+        /* atualiza cards */
+        document.getElementById("card-total").textContent = data.total_pacientes;
+        document.getElementById("card-atraso").textContent = data.total_atrasados;
+        document.getElementById("card-prazo").textContent =
+            data.total_pacientes - data.total_atrasados;
+
+        /* ordena A → Z */
+        data.dados.sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+        );
+
+        renderizar(data.dados);
+
+
+    }
+
+    /* ===== RENDER ===== */
+    function renderizar(lista) {
+        tbody.innerHTML = "";
+
+        if (!lista || lista.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5">Nenhum registro</td></tr>`;
+            return;
+        }
+
+        lista.forEach(item => {
+
         const tr = document.createElement("tr");
-
         tr.innerHTML = `
-            <td>${p.nome}</td>
+            <td>${item.nome}</td>
+            <td>${formatarDataBR(item.data_prevista)}</td>
+
             <td>
-                <input
-                    type="date"
-                    id="data-${p.id}"
-                    value="${p.data_prevista ?? ""}"
-                >
+                ${item.retirada_id ? `
+                    <span id="view-retirada-${item.retirada_id}">
+                        ${formatarDataBR(item.data_retirada)}
+                    </span>
+
+                    <input type="date"
+                        id="retirada-${item.retirada_id}"
+                        value="${item.data_retirada ?? ""}"
+                        style="display:none">
+
+                    <button class="editar"
+                            onclick="habilitarEdicao(${item.retirada_id})">
+                        ✏️
+                    </button>
+                ` : "-"}
             </td>
+
             <td>
-                <button class="salvar" type="button" onclick="salvar(${p.id})">
-                    Salvar
-                </button>
-                <button class="excluir" type="button" onclick="excluir(${p.id})">
+                <span class="status ${item.cor}">
+                    ${item.status}
+                </span>
+            </td>
+
+            <td>
+                ${item.retirada_id ? `
+                    <button class="ok"
+                            onclick="marcarOk(${item.retirada_id})">
+                        OK
+                    </button>
+                ` : ""}
+
+                <button class="excluir"
+                        onclick="excluir(${item.paciente_id})">
                     Excluir
                 </button>
             </td>
         `;
-
         tbody.appendChild(tr);
-    });
-}
-
-
-async function carregar() {
-    let resp;
-
-    try {
-        resp = await fetch("/pacientes/", {
-            cache: "no-store"
         });
-    } catch (err) {
-        console.error("Falha de rede ao buscar pacientes", err);
-        return;
+
     }
 
-    if (!resp.ok) {
-        console.error("Erro ao buscar pacientes:", resp.status);
-        return;
-    }
+    /* ===== AÇÕES ===== */
+    window.habilitarEdicao = function (id) {
+    const input = document.getElementById(`retirada-${id}`);
+    const span = document.getElementById(`view-retirada-${id}`);
 
-    let pacientes;
-    try {
-        pacientes = await resp.json();
-    } catch (err) {
-        console.error("Resposta não é JSON válido", err);
-        return;
-    }
+    if (!input) return;
 
-    renderizarPacientes(pacientes);
-}
+    span.style.display = "none";
+    input.style.display = "inline-block";
+    input.focus();
+    };
 
 
+    window.marcarOk = async function (id) {
+        const input = document.getElementById(`retirada-${id}`);
+        if (!input || !input.value) {
+            alert("Informe a data de retirada antes de marcar OK");
+            return;
+        }
 
-async function excluir(id) {
-    if (!confirm("Excluir paciente?")) return;
-
-    const resp = await fetch(`/pacientes/${id}`, {
-        method: "DELETE"
-    });
-
-    if (!resp.ok) {
-        alert("Erro ao excluir");
-        return;
-    }
-
-    // 🔥 RECARREGA A LISTA
-    await carregar();
-}
-
-async function salvar(id) {
-    const input = document.getElementById(`data-${id}`);
-    const data = input.value;
-
-    if (!data) {
-        alert("Informe a data");
-        return;
-    }
-
-    const hoje = new Date();
-    const mes = hoje.getMonth() + 1;
-    const ano = hoje.getFullYear();
-
-    const resp = await fetch("/retiradas/definir-data", {
-        method: "POST",
+        const resp = await fetch(`/retiradas/${id}/marcar`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            paciente_id: id,
-            ano,
-            mes,
-            data_prevista: data
+        data_retirada: input.value
         })
-    });
+        });
 
-    if (!resp.ok) {
-        alert("Erro ao salvar data");
-        return;
-    }
 
-    // 🔥 RECARREGA A LISTA
-    await carregar();
-}
+        if (!resp.ok) {
+            alert("Erro ao marcar retirada");
+            return;
+        }
 
-// carrega ao abrir
-carregar();
+        carregar();
+    };
+
+    window.excluir = async function (id) {
+        if (!confirm("Excluir paciente?")) return;
+
+        const resp = await fetch(`/pacientes/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!resp.ok) {
+            alert("Erro ao excluir");
+            return;
+        }
+
+        carregar();
+    };
+
+    /* ===== INIT ===== */
+    carregar();
+
+});
 </script>
 
 </body>

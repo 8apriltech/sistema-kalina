@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Date, ForeignKey
+from sqlalchemy import Column, Integer, Date, Boolean, ForeignKey
 from database import Base
 
 class RetiradaMensal(Base):
@@ -6,7 +6,11 @@ class RetiradaMensal(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     paciente_id = Column(Integer, ForeignKey("pacientes.id"))
+
     ano = Column(Integer)
     mes = Column(Integer)
+
     data_prevista = Column(Date)
-    data_retirada = Column(Date)
+    data_retirada = Column(Date, nullable=True)
+
+    ok = Column(Boolean, default=False)
