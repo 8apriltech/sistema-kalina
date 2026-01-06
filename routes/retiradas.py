@@ -16,8 +16,93 @@ def get_db():
         db.close()
 
 
+# ===============================
+# DEFINIR / ATUALIZAR DATA PREVISTA
+# ===============================
+@router.put("/{retirada_id}/data-prevista")
+def atualizar_data_prevista(
+    retirada_id: int,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+):
+    retirada = db.query(RetiradaMensal).filter(
+        RetiradaMensal.id == retirada_id
+    ).first()
+
+    if not retirada:
+        raise HTTPException(404, "Retirada não encontrada")
+
+    try:
+        retirada.data_prevista = datetime.strptime(
+            payload["data_prevista"], "%Y-%m-%d"
+        ).date()
+    except Exception:
+        raise HTTPException(400, "Data inválida")
+
+    db.commit()
+    return {"status": "ok"}
+
+
+# ===============================
+# ATUALIZAR DATA DE RETIRADA (SEM OK)
+# ===============================
+@router.put("/{retirada_id}/data-retirada")
+def atualizar_data_retirada(
+    retirada_id: int,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+):
+    retirada = db.query(RetiradaMensal).filter(
+        RetiradaMensal.id == retirada_id
+    ).first()
+
+    if not retirada:
+        raise HTTPException(404, "Retirada não encontrada")
+
+    try:
+        retirada.data_retirada = datetime.strptime(
+            payload["data_retirada"], "%Y-%m-%d"
+        ).date()
+    except Exception:
+        raise HTTPException(400, "Data inválida")
+
+    db.commit()
+    return {"status": "ok"}
+
+
+# ===============================
+# MARCAR OK (CONFIRMAÇÃO HUMANA)
+# ===============================
+@router.put("/{retirada_id}/marcar")
+def marcar_ok(
+    retirada_id: int,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+):
+    retirada = db.query(RetiradaMensal).filter(
+        RetiradaMensal.id == retirada_id
+    ).first()
+
+    if not retirada:
+        raise HTTPException(404, "Retirada não encontrada")
+
+    try:
+        retirada.data_retirada = datetime.strptime(
+            payload["data_retirada"], "%Y-%m-%d"
+        ).date()
+    except Exception:
+        raise HTTPException(400, "Data inválida")
+
+    retirada.ok = True
+    db.commit()
+
+    return {"status": "ok"}
+
 @router.post("/definir-data")
-def definir_data_prevista(payload: dict = Body(...), db: Session = Depends(get_db)):
+def definir_data_prevista(
+    payload: dict = Body(...),
+    db: Session = Depends(get_db)
+):
     try:
         data_prevista = datetime.strptime(
             payload["data_prevista"], "%Y-%m-%d"
@@ -25,12 +110,16 @@ def definir_data_prevista(payload: dict = Body(...), db: Session = Depends(get_d
     except Exception:
         raise HTTPException(400, "Data inválida")
 
+    # 🔥 mês/ano derivados da data
+    ano = data_prevista.year
+    mes = data_prevista.month
+
     retirada = (
         db.query(RetiradaMensal)
         .filter(
             RetiradaMensal.paciente_id == payload["paciente_id"],
-            RetiradaMensal.ano == payload["ano"],
-            RetiradaMensal.mes == payload["mes"],
+            RetiradaMensal.ano == ano,
+            RetiradaMensal.mes == mes,
         )
         .first()
     )
@@ -40,37 +129,11 @@ def definir_data_prevista(payload: dict = Body(...), db: Session = Depends(get_d
     else:
         retirada = RetiradaMensal(
             paciente_id=payload["paciente_id"],
-            ano=payload["ano"],
-            mes=payload["mes"],
+            ano=ano,
+            mes=mes,
             data_prevista=data_prevista,
         )
         db.add(retirada)
-
-    db.commit()
-    return {"status": "ok"}
-
-
-@router.put("/{retirada_id}/marcar")
-def marcar_retirada(
-    retirada_id: int,
-    data_retirada: str = Body(..., embed=True),
-    db: Session = Depends(get_db),
-):
-    retirada = (
-        db.query(RetiradaMensal)
-        .filter(RetiradaMensal.id == retirada_id)
-        .first()
-    )
-
-    if not retirada:
-        raise HTTPException(404, "Retirada não encontrada")
-
-    try:
-        retirada.data_retirada = datetime.strptime(
-            data_retirada, "%Y-%m-%d"
-        ).date()
-    except Exception:
-        raise HTTPException(400, "Data inválida")
 
     db.commit()
     return {"status": "ok"}

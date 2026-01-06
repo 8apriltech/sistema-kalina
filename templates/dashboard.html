@@ -1,142 +1,133 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
+<meta charset="UTF-8">
+<title>Dashboard</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #020617;
-            color: #e5e7eb;
-            padding: 30px;
-        }
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #020617;
+    color: #e5e7eb;
+    padding: 30px;
+}
 
-        h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
+h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
 
-        table {
-            width: 100%;
-            max-width: 1100px;
-            margin: auto;
-            border-collapse: collapse;
-        }
+table {
+    width: 100%;
+    max-width: 1100px;
+    margin: auto;
+    border-collapse: collapse;
+}
 
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #334155;
-            text-align: center;
-        }
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #334155;
+    text-align: center;
+}
 
-        th {
-            color: #93c5fd;
-        }
+th {
+    color: #93c5fd;
+}
 
-        button {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            margin: 2px;
-            font-weight: bold;
-        }
+button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    margin: 2px;
+    font-weight: bold;
+}
 
-        .ok {
-            background: #22c55e;
-            color: #020617;
-        }
+.ok {
+    background: #22c55e;
+    color: #020617;
+}
 
-        .excluir {
-            background: #ef4444;
-            color: white;
-        }
+.excluir {
+    background: #ef4444;
+    color: white;
+}
 
-        .editar {
-            background: transparent;
-            color: #93c5fd;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-        }
+.editar {
+    background: transparent;
+    color: #93c5fd;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+}
 
-        .editar:hover {
-            color: #60a5fa;
-        }
+.editar:hover {
+    color: #60a5fa;
+}
 
-        input[type="date"], select {
-            background: #020617;
-            color: #e5e7eb;
-            border: 1px solid #334155;
-            border-radius: 4px;
-            padding: 5px;
-        }
+input[type="date"], select {
+    background: #020617;
+    color: #e5e7eb;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    padding: 5px;
+}
 
-        .status.vermelho { color: #ef4444; font-weight: bold; }
-        .status.azul { color: #3b82f6; font-weight: bold; }
-        .status.verde { color: #22c55e; font-weight: bold; }
-        .status.cinza { color: #9ca3af; font-weight: bold; }
+.status.vermelho { color: #ef4444; font-weight: bold; }
+.status.azul { color: #3b82f6; font-weight: bold; }
+.status.verde { color: #22c55e; font-weight: bold; }
+.status.cinza { color: #9ca3af; font-weight: bold; }
 
-        .top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1100px;
-            margin: 0 auto 20px;
-            gap: 10px;
-        }
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto 20px;
+    gap: 10px;
+}
 
-        .top-right {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+.top-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
 
-        .cards {
+.cards {
     max-width: 1100px;
     margin: 0 auto 25px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 15px;
-        }
+}
 
-        .card {
-            background: #020617;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
+.card {
+    background: #020617;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
 
-        .card span {
-            display: block;
-            font-size: 14px;
-            color: #94a3b8;
-            margin-bottom: 8px;
-        }
+.card span {
+    display: block;
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
 
-        .card strong {
-            font-size: 32px;
-            font-weight: bold;
-        }
+.card strong {
+    font-size: 32px;
+    font-weight: bold;
+}
 
-        .card.total strong {
-            color: #93c5fd;
-        }
-
-        .card.atraso strong {
-            color: #ef4444;
-        }
-
-        .card.prazo strong {
-            color: #3b82f6;
-        }
-
-
-    </style>
+.card.total strong { color: #93c5fd; }
+.card.atraso strong { color: #ef4444; }
+.card.prazo strong { color: #3b82f6; }
+</style>
 </head>
+
 <body>
 
 <h2>Dashboard de Retiradas</h2>
@@ -146,18 +137,15 @@
         <span>Total de Pacientes</span>
         <strong id="card-total">0</strong>
     </div>
-
     <div class="card atraso">
         <span>Em Atraso</span>
         <strong id="card-atraso">0</strong>
     </div>
-
     <div class="card prazo">
         <span>Dentro do Prazo</span>
         <strong id="card-prazo">0</strong>
     </div>
 </div>
-
 
 <div class="top">
     <div>
@@ -175,200 +163,157 @@
 </div>
 
 <table>
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Data Prevista</th>
-            <th>Data Retirada</th>
-            <th>Status</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
+<thead>
+<tr>
+    <th>Nome</th>
+    <th>Data Prevista</th>
+    <th>Data Retirada</th>
+    <th>Status</th>
+    <th>Ações</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
 </table>
 
 <script>
-
-function formatarDataBR(dataISO) {
+function formatarBR(dataISO) {
     if (!dataISO) return "-";
-    const [ano, mes, dia] = dataISO.split("-");
-    return `${dia}/${mes}/${ano}`;
+    const [a, m, d] = dataISO.split("-");
+    return `${d}/${m}/${a}`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const selectAno = document.getElementById("ano");
-    const selectMes = document.getElementById("mes");
-    const tbody = document.getElementById("tbody");
+const selectAno = document.getElementById("ano");
+const selectMes = document.getElementById("mes");
+const tbody = document.getElementById("tbody");
 
-    /* ===== ANOS ===== */
-    [2024, 2025, 2026].forEach(a => {
-        const o = document.createElement("option");
-        o.value = a;
-        o.textContent = a;
-        selectAno.appendChild(o);
+/* anos */
+[2024, 2025, 2026].forEach(a => {
+    const o = document.createElement("option");
+    o.value = a;
+    o.textContent = a;
+    selectAno.appendChild(o);
+});
+
+/* meses */
+[
+ "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+ "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+].forEach((m, i) => {
+    const o = document.createElement("option");
+    o.value = i + 1;
+    o.textContent = m;
+    selectMes.appendChild(o);
+});
+
+const hoje = new Date();
+selectAno.value = hoje.getFullYear();
+selectMes.value = hoje.getMonth() + 1;
+
+selectAno.onchange = carregar;
+selectMes.onchange = carregar;
+
+async function carregar() {
+    const resp = await fetch(`/dashboard/?ano=${selectAno.value}&mes=${selectMes.value}`, {
+        cache: "no-store"
     });
+    if (!resp.ok) return;
 
-    /* ===== MESES ===== */
-    [
-        "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
-    ].forEach((m, i) => {
-        const o = document.createElement("option");
-        o.value = i + 1;
-        o.textContent = m;
-        selectMes.appendChild(o);
-    });
+    const data = await resp.json();
 
-    /* ===== MÊS ATUAL ===== */
-    const hoje = new Date();
-    selectAno.value = hoje.getFullYear();
-    selectMes.value = hoje.getMonth() + 1;
+    document.getElementById("card-total").textContent = data.total_pacientes;
+    document.getElementById("card-atraso").textContent = data.total_atrasados;
+    document.getElementById("card-prazo").textContent =
+        data.total_pacientes - data.total_atrasados;
 
-    selectAno.addEventListener("change", carregar);
-    selectMes.addEventListener("change", carregar);
+    data.dados.sort((a, b) =>
+        a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+    );
 
-    /* ===== FETCH ===== */
-    async function carregar() {
-        const resp = await fetch(
-            `/dashboard/?ano=${selectAno.value}&mes=${selectMes.value}`,
-            { cache: "no-store" }
-        );
+    renderizar(data.dados);
+}
 
-        if (!resp.ok) return;
-
-        const data = await resp.json();
-
-        /* atualiza cards */
-        document.getElementById("card-total").textContent = data.total_pacientes;
-        document.getElementById("card-atraso").textContent = data.total_atrasados;
-        document.getElementById("card-prazo").textContent =
-            data.total_pacientes - data.total_atrasados;
-
-        /* ordena A → Z */
-        data.dados.sort((a, b) =>
-            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-        );
-
-        renderizar(data.dados);
-
-
+function renderizar(lista) {
+    tbody.innerHTML = "";
+    if (!lista.length) {
+        tbody.innerHTML = `<tr><td colspan="5">Nenhum registro</td></tr>`;
+        return;
     }
 
-    /* ===== RENDER ===== */
-    function renderizar(lista) {
-        tbody.innerHTML = "";
-
-        if (!lista || lista.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5">Nenhum registro</td></tr>`;
-            return;
-        }
-
-        lista.forEach(item => {
-
+    lista.forEach(item => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${item.nome}</td>
-            <td>${formatarDataBR(item.data_prevista)}</td>
+<td>${item.nome}</td>
 
-            <td>
-                ${item.retirada_id ? `
-                    <span id="view-retirada-${item.retirada_id}">
-                        ${formatarDataBR(item.data_retirada)}
-                    </span>
+<td>
+  <span id="view-prevista-${item.retirada_id}">
+    ${formatarBR(item.data_prevista)}
+  </span>
+  <input type="date"
+         id="prevista-${item.retirada_id}"
+         value="${item.data_prevista ?? ""}"
+         style="display:none">
+  <button class="editar" onclick="editarPrevista(${item.retirada_id})">✏️</button>
+</td>
 
-                    <input type="date"
-                        id="retirada-${item.retirada_id}"
-                        value="${item.data_retirada ?? ""}"
-                        style="display:none">
+<td>
+  <span id="view-retirada-${item.retirada_id}">
+    ${formatarBR(item.data_retirada)}
+  </span>
+  <input type="date"
+         id="retirada-${item.retirada_id}"
+         value="${item.data_retirada ?? ""}"
+         style="display:none">
+  <button class="editar" onclick="editarRetirada(${item.retirada_id})">✏️</button>
+</td>
 
-                    <button class="editar"
-                            onclick="habilitarEdicao(${item.retirada_id})">
-                        ✏️
-                    </button>
-                ` : "-"}
-            </td>
+<td>
+  <span class="status ${item.cor}">${item.status}</span>
+</td>
 
-            <td>
-                <span class="status ${item.cor}">
-                    ${item.status}
-                </span>
-            </td>
-
-            <td>
-                ${item.retirada_id ? `
-                    <button class="ok"
-                            onclick="marcarOk(${item.retirada_id})">
-                        OK
-                    </button>
-                ` : ""}
-
-                <button class="excluir"
-                        onclick="excluir(${item.paciente_id})">
-                    Excluir
-                </button>
-            </td>
-        `;
+<td>
+  <button class="ok" onclick="marcarOk(${item.retirada_id})">OK</button>
+  <button class="excluir" onclick="excluir(${item.paciente_id})">Excluir</button>
+</td>`;
         tbody.appendChild(tr);
-        });
+    });
+}
 
-    }
-
-    /* ===== AÇÕES ===== */
-    window.habilitarEdicao = function (id) {
-    const input = document.getElementById(`retirada-${id}`);
-    const span = document.getElementById(`view-retirada-${id}`);
-
-    if (!input) return;
-
-    span.style.display = "none";
+/* ===== EDIÇÕES ===== */
+window.editarPrevista = id => {
+    document.getElementById(`view-prevista-${id}`).style.display = "none";
+    const input = document.getElementById(`prevista-${id}`);
     input.style.display = "inline-block";
     input.focus();
-    };
+};
 
+window.editarRetirada = id => {
+    document.getElementById(`view-retirada-${id}`).style.display = "none";
+    const input = document.getElementById(`retirada-${id}`);
+    input.style.display = "inline-block";
+    input.focus();
+};
 
-    window.marcarOk = async function (id) {
-        const input = document.getElementById(`retirada-${id}`);
-        if (!input || !input.value) {
-            alert("Informe a data de retirada antes de marcar OK");
-            return;
-        }
+window.marcarOk = async id => {
+    const input = document.getElementById(`retirada-${id}`);
+    if (!input.value) return alert("Informe a data de retirada");
 
-        const resp = await fetch(`/retiradas/${id}/marcar`, {
+    await fetch(`/retiradas/${id}/marcar`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-        data_retirada: input.value
-        })
-        });
-
-
-        if (!resp.ok) {
-            alert("Erro ao marcar retirada");
-            return;
-        }
-
-        carregar();
-    };
-
-    window.excluir = async function (id) {
-        if (!confirm("Excluir paciente?")) return;
-
-        const resp = await fetch(`/pacientes/${id}`, {
-            method: "DELETE"
-        });
-
-        if (!resp.ok) {
-            alert("Erro ao excluir");
-            return;
-        }
-
-        carregar();
-    };
-
-    /* ===== INIT ===== */
+        body: JSON.stringify({ data_retirada: input.value })
+    });
     carregar();
+};
 
+window.excluir = async id => {
+    if (!confirm("Excluir paciente?")) return;
+    await fetch(`/pacientes/${id}`, { method: "DELETE" });
+    carregar();
+};
+
+carregar();
 });
 </script>
 
