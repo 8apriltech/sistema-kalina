@@ -9,7 +9,6 @@ from models.paciente import Paciente
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 
-# ---------- DEPENDÊNCIA DB ----------
 def get_db():
     db = SessionLocal()
     try:
@@ -18,7 +17,6 @@ def get_db():
         db.close()
 
 
-# ---------- DASHBOARD MENSAL ----------
 @router.get("/")
 def dashboard_mensal(
     ano: int,
@@ -27,15 +25,12 @@ def dashboard_mensal(
 ):
     hoje = date.today()
 
-    # 🔥 REGRA DE OURO:
-    # O dashboard nasce da tabela retiradas_mensais
     retiradas = (
         db.query(RetiradaMensal)
-        .join(Paciente, Paciente.id == RetiradaMensal.paciente_id)
-        .filter(
+            .filter(
             RetiradaMensal.ano == ano,
             RetiradaMensal.mes == mes,
-            RetiradaMensal.data_prevista.isnot(None)
+    
         )
         .all()
     )
@@ -43,13 +38,18 @@ def dashboard_mensal(
     resultado = []
 
     for retirada in retiradas:
-        paciente = retirada.paciente  # relacionamento direto
+        paciente = (
+            db.query(Paciente)
+            .filter(Paciente.id == retirada.paciente_id)
+            .first()
+        )
 
-        # ---------- STATUS ----------
+        if not paciente:
+            continue
+
         if retirada.data_retirada:
             status = "OK"
             cor = "verde"
-
         elif retirada.data_prevista:
             if retirada.data_prevista < hoje:
                 status = "Atrasado"
@@ -57,7 +57,6 @@ def dashboard_mensal(
             else:
                 status = "Dentro do Prazo"
                 cor = "azul"
-
         else:
             status = "Sem Registro"
             cor = "cinza"

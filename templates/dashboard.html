@@ -30,9 +30,7 @@ th, td {
     text-align: center;
 }
 
-th {
-    color: #93c5fd;
-}
+th { color: #93c5fd; }
 
 button {
     padding: 6px 12px;
@@ -43,26 +41,14 @@ button {
     font-weight: bold;
 }
 
-.ok {
-    background: #22c55e;
-    color: #020617;
-}
-
-.excluir {
-    background: #ef4444;
-    color: white;
-}
+.ok { background: #22c55e; color: #020617; }
+.excluir { background: #ef4444; color: white; }
 
 .editar {
     background: transparent;
     color: #93c5fd;
     font-size: 16px;
     cursor: pointer;
-    border: none;
-}
-
-.editar:hover {
-    color: #60a5fa;
 }
 
 input[type="date"], select {
@@ -81,16 +67,8 @@ input[type="date"], select {
 .top {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     max-width: 1100px;
     margin: 0 auto 20px;
-    gap: 10px;
-}
-
-.top-right {
-    display: flex;
-    gap: 10px;
-    align-items: center;
 }
 
 .cards {
@@ -102,29 +80,11 @@ input[type="date"], select {
 }
 
 .card {
-    background: #020617;
     border: 1px solid #334155;
     border-radius: 12px;
     padding: 20px;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
-
-.card span {
-    display: block;
-    font-size: 14px;
-    color: #94a3b8;
-    margin-bottom: 8px;
-}
-
-.card strong {
-    font-size: 32px;
-    font-weight: bold;
-}
-
-.card.total strong { color: #93c5fd; }
-.card.atraso strong { color: #ef4444; }
-.card.prazo strong { color: #3b82f6; }
 </style>
 </head>
 
@@ -133,32 +93,17 @@ input[type="date"], select {
 <h2>Dashboard de Retiradas</h2>
 
 <div class="cards">
-    <div class="card total">
-        <span>Total de Pacientes</span>
-        <strong id="card-total">0</strong>
-    </div>
-    <div class="card atraso">
-        <span>Em Atraso</span>
-        <strong id="card-atraso">0</strong>
-    </div>
-    <div class="card prazo">
-        <span>Dentro do Prazo</span>
-        <strong id="card-prazo">0</strong>
-    </div>
+    <div class="card">Total<br><strong id="card-total">0</strong></div>
+    <div class="card">Em Atraso<br><strong id="card-atraso">0</strong></div>
+    <div class="card">Dentro do Prazo<br><strong id="card-prazo">0</strong></div>
 </div>
 
 <div class="top">
+    <button onclick="location.href='/'">← Voltar</button>
     <div>
-        <button onclick="location.href='/'">← Voltar</button>
-    </div>
-
-    <div class="top-right">
         <select id="ano"></select>
         <select id="mes"></select>
-
-        <button onclick="location.href='/cadastrar-paciente'">
-            Novo Paciente
-        </button>
+        <button onclick="location.href='/cadastrar-paciente'">Novo Paciente</button>
     </div>
 </div>
 
@@ -176,145 +121,125 @@ input[type="date"], select {
 </table>
 
 <script>
-function formatarBR(dataISO) {
-    if (!dataISO) return "-";
-    const [a, m, d] = dataISO.split("-");
-    return `${d}/${m}/${a}`;
-}
+    const formatarBR = d => d ? d.split("-").reverse().join("/") : "-";
 
-document.addEventListener("DOMContentLoaded", () => {
+    const tbody = document.getElementById("tbody");
+    const anoSel = document.getElementById("ano");
+    const mesSel = document.getElementById("mes");
 
-const selectAno = document.getElementById("ano");
-const selectMes = document.getElementById("mes");
-const tbody = document.getElementById("tbody");
+    [2024,2025,2026].forEach(a => anoSel.add(new Option(a,a)));
+    ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+    .forEach((m,i)=>mesSel.add(new Option(m,i+1)));
 
-/* anos */
-[2024, 2025, 2026].forEach(a => {
-    const o = document.createElement("option");
-    o.value = a;
-    o.textContent = a;
-    selectAno.appendChild(o);
-});
+    const hoje = new Date();
+    anoSel.value = hoje.getFullYear();
+    mesSel.value = hoje.getMonth()+1;
 
-/* meses */
-[
- "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
- "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
-].forEach((m, i) => {
-    const o = document.createElement("option");
-    o.value = i + 1;
-    o.textContent = m;
-    selectMes.appendChild(o);
-});
+    anoSel.onchange = mesSel.onchange = carregar;
 
-const hoje = new Date();
-selectAno.value = hoje.getFullYear();
-selectMes.value = hoje.getMonth() + 1;
+    async function carregar() {
+        const r = await fetch(
+            `/dashboard/?ano=${anoSel.value}&mes=${mesSel.value}`,
+            { cache: "no-store" }
+        );
+        if (!r.ok) return;
 
-selectAno.onchange = carregar;
-selectMes.onchange = carregar;
+        const data = await r.json();
 
-async function carregar() {
-    const resp = await fetch(`/dashboard/?ano=${selectAno.value}&mes=${selectMes.value}`, {
-        cache: "no-store"
-    });
-    if (!resp.ok) return;
+        document.getElementById("card-total").textContent = data.total_pacientes;
+        document.getElementById("card-atraso").textContent = data.total_atrasados;
+        document.getElementById("card-prazo").textContent =
+            data.total_pacientes - data.total_atrasados;
 
-    const data = await resp.json();
+        // 🔤 ordem alfabética correta
+        data.dados.sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+        );
 
-    document.getElementById("card-total").textContent = data.total_pacientes;
-    document.getElementById("card-atraso").textContent = data.total_atrasados;
-    document.getElementById("card-prazo").textContent =
-        data.total_pacientes - data.total_atrasados;
-
-    data.dados.sort((a, b) =>
-        a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-    );
-
-    renderizar(data.dados);
-}
-
-function renderizar(lista) {
-    tbody.innerHTML = "";
-    if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="5">Nenhum registro</td></tr>`;
-        return;
+        renderizar(data.dados);
     }
 
-    lista.forEach(item => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-<td>${item.nome}</td>
+    function renderizar(lista) {
+        tbody.innerHTML = "";
+        if (!lista.length) {
+            tbody.innerHTML = `<tr><td colspan="5">Nenhum registro</td></tr>`;
+            return;
+        }
 
-<td>
-  <span id="view-prevista-${item.retirada_id}">
-    ${formatarBR(item.data_prevista)}
-  </span>
-  <input type="date"
-         id="prevista-${item.retirada_id}"
-         value="${item.data_prevista ?? ""}"
-         style="display:none">
-  <button class="editar" onclick="editarPrevista(${item.retirada_id})">✏️</button>
-</td>
+        lista.forEach(i => {
+            tbody.innerHTML += `
+    <tr>
+    <td>${i.nome}</td>
 
-<td>
-  <span id="view-retirada-${item.retirada_id}">
-    ${formatarBR(item.data_retirada)}
-  </span>
-  <input type="date"
-         id="retirada-${item.retirada_id}"
-         value="${item.data_retirada ?? ""}"
-         style="display:none">
-  <button class="editar" onclick="editarRetirada(${item.retirada_id})">✏️</button>
-</td>
+    <td>
+    <span id="v-prev-${i.retirada_id}">${formatarBR(i.data_prevista)}</span>
+    <input type="date" id="i-prev-${i.retirada_id}" value="${i.data_prevista ?? ""}" style="display:none">
+    <button class="editar" onclick="editarPrev(${i.retirada_id})">✏️</button>
+    <button class="ok" id="s-prev-${i.retirada_id}" style="display:none" onclick="salvarPrev(${i.retirada_id})">Salvar</button>
+    </td>
 
-<td>
-  <span class="status ${item.cor}">${item.status}</span>
-</td>
+    <td>
+    <span id="v-ret-${i.retirada_id}">${formatarBR(i.data_retirada)}</span>
+    <input type="date" id="i-ret-${i.retirada_id}" value="${i.data_retirada ?? ""}" style="display:none">
+    <button class="editar" onclick="editarRet(${i.retirada_id})">✏️</button>
+    </td>
 
-<td>
-  <button class="ok" onclick="marcarOk(${item.retirada_id})">OK</button>
-  <button class="excluir" onclick="excluir(${item.paciente_id})">Excluir</button>
-</td>`;
-        tbody.appendChild(tr);
-    });
-}
+    <td><span class="status ${i.cor}">${i.status}</span></td>
 
-/* ===== EDIÇÕES ===== */
-window.editarPrevista = id => {
-    document.getElementById(`view-prevista-${id}`).style.display = "none";
-    const input = document.getElementById(`prevista-${id}`);
-    input.style.display = "inline-block";
-    input.focus();
-};
+    <td>
+    <button class="ok" onclick="marcarOk(${i.retirada_id})">OK</button>
+    <button class="excluir" onclick="excluir(${i.paciente_id})">Excluir</button>
+    </td>
+    </tr>`;
+        });
+    }
 
-window.editarRetirada = id => {
-    document.getElementById(`view-retirada-${id}`).style.display = "none";
-    const input = document.getElementById(`retirada-${id}`);
-    input.style.display = "inline-block";
-    input.focus();
-};
+    function editarPrev(id){
+        document.getElementById(`v-prev-${id}`).style.display="none";
+        document.getElementById(`i-prev-${id}`).style.display="inline-block";
+        document.getElementById(`s-prev-${id}`).style.display="inline-block";
+    }
 
-window.marcarOk = async id => {
-    const input = document.getElementById(`retirada-${id}`);
-    if (!input.value) return alert("Informe a data de retirada");
+    async function salvarPrev(id){
+        const v = document.getElementById(`i-prev-${id}`).value;
+        
+        // permite limpar a data
+        const payload = v ? { data_prevista: v } : { data_prevista: null };
 
-    await fetch(`/retiradas/${id}/marcar`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data_retirada: input.value })
-    });
-    carregar();
-};
 
-window.excluir = async id => {
-    if (!confirm("Excluir paciente?")) return;
-    await fetch(`/pacientes/${id}`, { method: "DELETE" });
-    carregar();
-};
+        await fetch(`/retiradas/${id}/data-prevista`,{
+            method:"PUT",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify(payload)
+        });
+        
+        carregar();
+    }
+
+    function editarRet(id){
+        document.getElementById(`v-ret-${id}`).style.display="none";
+        document.getElementById(`i-ret-${id}`).style.display="inline-block";
+    }
+
+    async function marcarOk(id){
+        const v = document.getElementById(`i-ret-${id}`).value;
+        if(!v) return alert("Informe a data de retirada");
+        await fetch(`/retiradas/${id}/marcar`,{
+            method:"PUT",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ data_retirada:v })
+        });
+        carregar();
+    }
+
+    async function excluir(id){
+        if(confirm("Excluir paciente?")){
+            await fetch(`/pacientes/${id}`,{ method:"DELETE" });
+            carregar();
+        }
+    }
 
 carregar();
-});
 </script>
 
 </body>
