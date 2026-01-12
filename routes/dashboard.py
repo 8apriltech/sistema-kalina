@@ -27,10 +27,9 @@ def dashboard_mensal(
 
     retiradas = (
         db.query(RetiradaMensal)
-            .filter(
+        .filter(
             RetiradaMensal.ano == ano,
             RetiradaMensal.mes == mes,
-    
         )
         .all()
     )
@@ -50,13 +49,15 @@ def dashboard_mensal(
         if retirada.data_retirada:
             status = "OK"
             cor = "verde"
+
         elif retirada.data_prevista:
             if retirada.data_prevista < hoje:
-                status = "Atrasado"
+                status = "Em Atraso"
                 cor = "vermelho"
             else:
                 status = "Dentro do Prazo"
                 cor = "azul"
+
         else:
             status = "Sem Registro"
             cor = "cinza"
@@ -71,15 +72,8 @@ def dashboard_mensal(
             "cor": cor
         })
 
-    total_pacientes = len(resultado)
-    total_atrasados = sum(
-        1 for r in resultado if r["status"] == "Atrasado"
-    )
-
     return {
         "ano": ano,
         "mes": mes,
-        "total_pacientes": total_pacientes,
-        "total_atrasados": total_atrasados,
         "dados": resultado
     }

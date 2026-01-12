@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from routes.dashboard import router as dashboard_router
@@ -29,19 +28,19 @@ app.include_router(pacientes_router)
 app.include_router(retiradas_router)
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 def home(request: Request, response: Response):
     no_cache(response)
     return templates.TemplateResponse("home.html", {"request": request})
 
 
-@app.get("/dashboard-view", response_class=HTMLResponse)
+@app.get("/dashboard-view")
 def dashboard_view(request: Request, response: Response):
     no_cache(response)
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
-@app.get("/cadastrar-paciente", response_class=HTMLResponse)
+@app.get("/cadastrar-paciente")
 def cadastrar_paciente_view(request: Request, response: Response):
     no_cache(response)
     return templates.TemplateResponse("cadastrar_paciente.html", {"request": request})

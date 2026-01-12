@@ -75,7 +75,7 @@ input[type="date"], select {
     max-width: 1100px;
     margin: 0 auto 25px;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 15px;
 }
 
@@ -85,6 +85,56 @@ input[type="date"], select {
     padding: 20px;
     text-align: center;
 }
+
+.card strong {
+    display: block;
+    margin-top: 6px;
+    font-size: 32px;
+}
+
+.card-atraso { color: #ef4444; }
+.card-prazo { color: #3b82f6; }
+.card-ok { color: #22c55e; }
+.card-sem { color: #9ca3af; }
+.card-total { color: #07e9de; }
+
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sort-icon {
+    font-size: 10px;
+    margin-left: 6px;
+    opacity: 0.6;
+}
+
+th.sort-asc .sort-icon::after {
+    content: "▲";
+}
+
+th.sort-desc .sort-icon::after {
+    content: "▼";
+}
+
+th.sort-asc,
+th.sort-desc {
+    color: #38bdf8;
+}
+
+tr.atraso {
+    background: rgba(239, 68, 68, 0.08);
+}
+
+tr.atraso td:first-child {
+    color: #fecaca;
+    font-weight: bold;
+}
+
+.badge-atraso {
+    margin-right: 6px;
+}
+
 </style>
 </head>
 
@@ -93,9 +143,11 @@ input[type="date"], select {
 <h2>Dashboard de Retiradas</h2>
 
 <div class="cards">
-    <div class="card">Total<br><strong id="card-total">0</strong></div>
-    <div class="card">Em Atraso<br><strong id="card-atraso">0</strong></div>
-    <div class="card">Dentro do Prazo<br><strong id="card-prazo">0</strong></div>
+    <div class="card">Em Atraso<strong id="card-atraso" class="card-atraso">0</strong></div>
+    <div class="card">Dentro do Prazo<strong id="card-prazo" class="card-prazo">0</strong></div>
+    <div class="card">OK<strong id="card-ok" class="card-ok">0</strong></div>
+    <div class="card">Sem Registro<strong id="card-sem" class="card-sem">0</strong></div>
+    <div class="card">Total Geral<strong id="card-total" class="card-total">0</strong></div>
 </div>
 
 <div class="top">
@@ -110,9 +162,9 @@ input[type="date"], select {
 <table>
 <thead>
 <tr>
-    <th>Nome</th>
-    <th>Data Prevista</th>
-    <th>Data Retirada</th>
+    <th class="sortable" data-col="nome" data-type="text">Nome <span class="sort-icon"></span></th>
+    <th class="sortable" data-col="data_prevista" data-type="date">Data Prevista <span class="sort-icon"></span></th>
+    <th class="sortable" data-col="data_retirada" data-type="date">Data Retirada <span class="sort-icon"></span></th>
     <th>Status</th>
     <th>Ações</th>
 </tr>
@@ -121,123 +173,176 @@ input[type="date"], select {
 </table>
 
 <script>
-    const formatarBR = d => d ? d.split("-").reverse().join("/") : "-";
+const formatarBR = d => d ? d.split("-").reverse().join("/") : "-";
 
-    const tbody = document.getElementById("tbody");
-    const anoSel = document.getElementById("ano");
-    const mesSel = document.getElementById("mes");
+const tbody = document.getElementById("tbody");
+const anoSel = document.getElementById("ano");
+const mesSel = document.getElementById("mes");
+let dadosAtuais = [];
+let ordenacao = { campo: "nome", direcao: "asc" };
 
-    [2024,2025,2026].forEach(a => anoSel.add(new Option(a,a)));
-    ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-    .forEach((m,i)=>mesSel.add(new Option(m,i+1)));
+[2024,2025,2026].forEach(a => anoSel.add(new Option(a,a)));
+["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+.forEach((m,i)=>mesSel.add(new Option(m,i+1)));
 
-    const hoje = new Date();
-    anoSel.value = hoje.getFullYear();
-    mesSel.value = hoje.getMonth()+1;
+const hoje = new Date();
+anoSel.value = hoje.getFullYear();
+mesSel.value = hoje.getMonth()+1;
 
-    anoSel.onchange = mesSel.onchange = carregar;
+anoSel.onchange = mesSel.onchange = carregar;
 
-    async function carregar() {
-        const r = await fetch(
-            `/dashboard/?ano=${anoSel.value}&mes=${mesSel.value}`,
-            { cache: "no-store" }
-        );
-        if (!r.ok) return;
+document.querySelectorAll("th.sortable").forEach(th => {
+    th.addEventListener("click", () => {
+        const campo = th.dataset.col;
 
-        const data = await r.json();
-
-        document.getElementById("card-total").textContent = data.total_pacientes;
-        document.getElementById("card-atraso").textContent = data.total_atrasados;
-        document.getElementById("card-prazo").textContent =
-            data.total_pacientes - data.total_atrasados;
-
-        // 🔤 ordem alfabética correta
-        data.dados.sort((a, b) =>
-            a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-        );
-
-        renderizar(data.dados);
-    }
-
-    function renderizar(lista) {
-        tbody.innerHTML = "";
-        if (!lista.length) {
-            tbody.innerHTML = `<tr><td colspan="5">Nenhum registro</td></tr>`;
-            return;
+        if (ordenacao.campo === campo) {
+            ordenacao.direcao = ordenacao.direcao === "asc" ? "desc" : "asc";
+        } else {
+            ordenacao.campo = campo;
+            ordenacao.direcao = "asc";
         }
 
-        lista.forEach(i => {
-            tbody.innerHTML += `
-    <tr>
-    <td>${i.nome}</td>
+        atualizarIcones(th);
+        aplicarOrdenacao();
+    });
+});
 
-    <td>
-    <span id="v-prev-${i.retirada_id}">${formatarBR(i.data_prevista)}</span>
-    <input type="date" id="i-prev-${i.retirada_id}" value="${i.data_prevista ?? ""}" style="display:none">
-    <button class="editar" onclick="editarPrev(${i.retirada_id})">✏️</button>
-    <button class="ok" id="s-prev-${i.retirada_id}" style="display:none" onclick="salvarPrev(${i.retirada_id})">Salvar</button>
-    </td>
+function atualizarIcones(thAtivo) {
+    document.querySelectorAll("th.sortable").forEach(th => {
+        th.classList.remove("sort-asc", "sort-desc");
+    });
 
-    <td>
-    <span id="v-ret-${i.retirada_id}">${formatarBR(i.data_retirada)}</span>
-    <input type="date" id="i-ret-${i.retirada_id}" value="${i.data_retirada ?? ""}" style="display:none">
-    <button class="editar" onclick="editarRet(${i.retirada_id})">✏️</button>
-    </td>
+    thAtivo.classList.add(
+        ordenacao.direcao === "asc" ? "sort-asc" : "sort-desc"
+    );
+}
 
-    <td><span class="status ${i.cor}">${i.status}</span></td>
+async function carregar() {
+    const r = await fetch(`/dashboard/?ano=${anoSel.value}&mes=${mesSel.value}`, { cache:"no-store" });
+    if (!r.ok) return;
 
-    <td>
-    <button class="ok" onclick="marcarOk(${i.retirada_id})">OK</button>
-    <button class="excluir" onclick="excluir(${i.paciente_id})">Excluir</button>
-    </td>
-    </tr>`;
-        });
-    }
+    const data = await r.json();
 
-    function editarPrev(id){
-        document.getElementById(`v-prev-${id}`).style.display="none";
-        document.getElementById(`i-prev-${id}`).style.display="inline-block";
-        document.getElementById(`s-prev-${id}`).style.display="inline-block";
-    }
+    let atraso = 0, prazo = 0, ok = 0, sem = 0;
 
-    async function salvarPrev(id){
-        const v = document.getElementById(`i-prev-${id}`).value;
-        
-        // permite limpar a data
-        const payload = v ? { data_prevista: v } : { data_prevista: null };
+    data.dados.forEach(i => {
+        if (i.status === "Em Atraso") atraso++;
+        else if (i.status === "Dentro do Prazo") prazo++;
+        else if (i.status === "OK") ok++;
+        else if (i.status === "Sem Registro") sem++;
+    });
 
+    document.getElementById("card-atraso").textContent = atraso;
+    document.getElementById("card-prazo").textContent = prazo;
+    document.getElementById("card-ok").textContent = ok;
+    document.getElementById("card-sem").textContent = sem;
+    document.getElementById("card-total").textContent = atraso + prazo + ok + sem;
 
-        await fetch(`/retiradas/${id}/data-prevista`,{
-            method:"PUT",
-            headers:{ "Content-Type":"application/json" },
-            body:JSON.stringify(payload)
-        });
-        
-        carregar();
-    }
+    dadosAtuais = data.dados;
+    aplicarOrdenacao();
 
-    function editarRet(id){
-        document.getElementById(`v-ret-${id}`).style.display="none";
-        document.getElementById(`i-ret-${id}`).style.display="inline-block";
-    }
+}
 
-    async function marcarOk(id){
-        const v = document.getElementById(`i-ret-${id}`).value;
-        if(!v) return alert("Informe a data de retirada");
-        await fetch(`/retiradas/${id}/marcar`,{
-            method:"PUT",
-            headers:{ "Content-Type":"application/json" },
-            body:JSON.stringify({ data_retirada:v })
-        });
-        carregar();
-    }
+function aplicarOrdenacao() {
+    const { campo, direcao } = ordenacao;
+    const mult = direcao === "asc" ? 1 : -1;
 
-    async function excluir(id){
-        if(confirm("Excluir paciente?")){
-            await fetch(`/pacientes/${id}`,{ method:"DELETE" });
-            carregar();
+    dadosAtuais.sort((a, b) => {
+        let A = a[campo] ?? "";
+        let B = b[campo] ?? "";
+
+        if (campo.includes("data")) {
+            A = A ? new Date(A) : new Date(0);
+            B = B ? new Date(B) : new Date(0);
+        } else {
+            A = A.toString().toLowerCase();
+            B = B.toString().toLowerCase();
         }
+
+        if (A < B) return -1 * mult;
+        if (A > B) return 1 * mult;
+        return 0;
+    });
+
+    renderizar(dadosAtuais);
+}
+
+function renderizar(lista) {
+    tbody.innerHTML = "";
+    if (!lista.length) {
+        tbody.innerHTML = `<tr><td colspan="5">Nenhum registro</td></tr>`;
+        return;
     }
+
+    lista.forEach(i => {
+        tbody.innerHTML += `
+<tr class="${i.status === 'Em Atraso' ? 'atraso' : ''}">
+<td>
+  ${i.status === "Em Atraso" ? '<span class="badge-atraso">⚠️</span>' : ''}
+  ${i.nome}
+</td>
+
+<td>
+  <span id="v-prev-${i.retirada_id}">${formatarBR(i.data_prevista)}</span>
+  <input type="date" id="i-prev-${i.retirada_id}" value="${i.data_prevista ?? ""}" style="display:none">
+  <button class="editar" onclick="editarPrev(${i.retirada_id})">✏️</button>
+  <button class="ok" id="s-prev-${i.retirada_id}" style="display:none" onclick="salvarPrev(${i.retirada_id})">Salvar</button>
+</td>
+
+<td>
+  <span id="v-ret-${i.retirada_id}">${formatarBR(i.data_retirada)}</span>
+  <input type="date" id="i-ret-${i.retirada_id}" value="${i.data_retirada ?? ""}" style="display:none">
+  <button class="editar" onclick="editarRet(${i.retirada_id})">✏️</button>
+</td>
+
+<td><span class="status ${i.cor}">${i.status}</span></td>
+
+<td>
+  <button class="ok" onclick="marcarOk(${i.retirada_id})">OK</button>
+  <button class="excluir" onclick="excluir(${i.paciente_id})">Excluir</button>
+</td>
+</tr>`;
+    });
+}
+
+function editarPrev(id){
+    document.getElementById(`v-prev-${id}`).style.display="none";
+    document.getElementById(`i-prev-${id}`).style.display="inline-block";
+    document.getElementById(`s-prev-${id}`).style.display="inline-block";
+}
+
+async function salvarPrev(id){
+    const v = document.getElementById(`i-prev-${id}`).value;
+    await fetch(`/retiradas/${id}/data-prevista`,{
+        method:"PUT",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ data_prevista: v || null })
+    });
+    carregar();
+}
+
+function editarRet(id){
+    document.getElementById(`v-ret-${id}`).style.display="none";
+    document.getElementById(`i-ret-${id}`).style.display="inline-block";
+}
+
+async function marcarOk(id){
+    const v = document.getElementById(`i-ret-${id}`).value;
+    if(!v) return alert("Informe a data de retirada");
+    await fetch(`/retiradas/${id}/marcar`,{
+        method:"PUT",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ data_retirada:v })
+    });
+    carregar();
+}
+
+async function excluir(id){
+    if(confirm("Excluir paciente?")){
+        await fetch(`/pacientes/${id}`,{ method:"DELETE" });
+        carregar();
+    }
+}
 
 carregar();
 </script>
