@@ -293,6 +293,7 @@ function renderizar(lista) {
   <span id="v-ret-${i.retirada_id}">${formatarBR(i.data_retirada)}</span>
   <input type="date" id="i-ret-${i.retirada_id}" value="${i.data_retirada ?? ""}" style="display:none">
   <button class="editar" onclick="editarRet(${i.retirada_id})">✏️</button>
+  <button class="editar" onclick="limparRet(${i.retirada_id})">🗑</button>
 </td>
 
 <td><span class="status ${i.cor}">${i.status}</span></td>
@@ -333,6 +334,15 @@ async function marcarOk(id){
         method:"PUT",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({ data_retirada:v })
+    });
+    carregar();
+}
+
+async function limparRet(id){
+    await fetch(`/retiradas/${id}/marcar`,{
+        method:"PUT",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ data_retirada: null })
     });
     carregar();
 }

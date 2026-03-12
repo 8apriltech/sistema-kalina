@@ -101,18 +101,23 @@ def marcar_ok(
     if not retirada:
         raise HTTPException(404, "Retirada não encontrada")
 
-    if not payload.get("data_retirada"):
-        raise HTTPException(400, "data_retirada é obrigatória para marcar OK")
+    data_retirada = payload.get("data_retirada")
 
-    try:
-        retirada.data_retirada = datetime.strptime(
-            payload["data_retirada"], "%Y-%m-%d"
-        ).date()
-    except Exception:
-        raise HTTPException(400, "Formato inválido de data (YYYY-MM-DD)")
+    # se vier vazio → limpar
+    if not data_retirada:
+        retirada.data_retirada = None
+        retirada.ok = False
+    else:
+        try:
+            retirada.data_retirada = datetime.strptime(
+                data_retirada, "%Y-%m-%d"
+            ).date()
+            retirada.ok = True
+        except Exception:
+            raise HTTPException(400, "Formato inválido de data (YYYY-MM-DD)")
 
-    retirada.ok = True
     db.commit()
+
     return {"status": "ok"}
 
 
