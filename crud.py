@@ -2,28 +2,36 @@ from sqlalchemy.orm import Session
 from models import Paciente, RetiradaMensal
 from datetime import date
 
+
 def criar_paciente(db: Session, nome: str, observacao: str = None):
-    # 1️⃣ cria o paciente
-    paciente = Paciente(nome=nome, observacao=observacao)
+
+    # cria o paciente
+    paciente = Paciente(
+        nome=nome,
+        observacao=observacao
+    )
+
     db.add(paciente)
     db.commit()
     db.refresh(paciente)
 
-    # 2️⃣ cria retirada automática do mês atual
     hoje = date.today()
 
-    retirada = RetiradaMensal(
-        paciente_id=paciente.id,
-        ano=hoje.year,
-        mes=hoje.month,
-        data_prevista=None,
-        data_retirada=None,
-        ok=False
-    )
+    # cria retiradas do mês atual até dezembro
+    for mes in range(hoje.month, 13):
 
-    db.add(retirada)
+        retirada = RetiradaMensal(
+            paciente_id=paciente.id,
+            ano=hoje.year,
+            mes=mes,
+            data_prevista=None,
+            data_retirada=None,
+            ok=False
+        )
+
+        db.add(retirada)
+
     db.commit()
-    db.refresh(retirada)
 
     return paciente
 

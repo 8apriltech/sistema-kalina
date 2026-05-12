@@ -135,12 +135,39 @@ tr.atraso td:first-child {
     margin-right: 6px;
 }
 
+.alerta-atraso {
+    max-width: 1100px;
+    margin: 0 auto 20px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    color: #fecaca;
+    font-weight: bold;
+    display: none;
+    animation: pulse 2s infinite;
+}
+
+.alerta-atraso strong {
+    color: white;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.75; }
+    100% { opacity: 1; }
+}
+
 </style>
 </head>
 
 <body>
 
-<h2>Dashboard de Retiradas</h2>
+<h2>Dashboard de Retiradas - Kalina</h2>
+
+<div id="alerta-atraso" class="alerta-atraso">
+    ⚠️ Existem <strong id="qtd-atrasos">0</strong> retiradas em atraso.
+</div>
 
 <div class="cards">
     <div class="card">Em Atraso<strong id="card-atraso" class="card-atraso">0</strong></div>
@@ -237,6 +264,16 @@ async function carregar() {
     document.getElementById("card-ok").textContent = ok;
     document.getElementById("card-sem").textContent = sem;
     document.getElementById("card-total").textContent = atraso + prazo + ok + sem;
+
+    const alerta = document.getElementById("alerta-atraso");
+    const qtd = document.getElementById("qtd-atrasos");
+
+    if (atraso > 0) {
+        alerta.style.display = "block";
+        qtd.textContent = atraso;
+    } else {
+        alerta.style.display = "none";
+    }
 
     dadosAtuais = data.dados;
     aplicarOrdenacao();

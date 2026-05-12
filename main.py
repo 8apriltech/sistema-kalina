@@ -9,11 +9,9 @@ from database import engine, Base
 from models import Paciente, RetiradaMensal
 
 
-# cria tabelas
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(redirect_slashes=False)
-
 
 templates = Jinja2Templates(directory="templates")
 
@@ -31,16 +29,28 @@ app.include_router(retiradas_router)
 @app.get("/")
 def home(request: Request, response: Response):
     no_cache(response)
-    return templates.TemplateResponse("home.html", {"request": request})
+
+    return templates.TemplateResponse(
+        "home.html",
+        {"request": request}
+    )
 
 
 @app.get("/dashboard-view")
 def dashboard_view(request: Request, response: Response):
     no_cache(response)
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request}
+    )
 
 
 @app.get("/cadastrar-paciente")
 def cadastrar_paciente_view(request: Request, response: Response):
     no_cache(response)
-    return templates.TemplateResponse("cadastrar_paciente.html", {"request": request})
+
+    return templates.TemplateResponse(
+        "cadastrar_paciente.html",
+        {"request": request}
+    )
