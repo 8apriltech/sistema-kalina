@@ -1,234 +1,975 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Retiradas - Sistema Kalina</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #020617;
-    color: #e5e7eb;
-    padding: 30px;
-}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
-h2 {
-    text-align: center;
-    margin-bottom: 10px;
-}
+        body {
+            background-color: #090d16;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.04) 0px, transparent 50%);
+            color: #f8fafc;
+            min-height: 100vh;
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-table {
-    width: 100%;
-    max-width: 1100px;
-    margin: auto;
-    border-collapse: collapse;
-}
+        .container {
+            width: 100%;
+            max-width: 1180px;
+        }
 
-th, td {
-    padding: 10px;
-    border-bottom: 1px solid #334155;
-    text-align: center;
-}
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
 
-th { color: #93c5fd; }
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
 
-button {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    margin: 2px;
-    font-weight: bold;
-}
+        .brand-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center 15%;
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+        }
 
-.ok { background: #22c55e; color: #020617; }
-.excluir { background: #ef4444; color: white; }
+        .header-titles h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
 
-.editar {
-    background: transparent;
-    color: #93c5fd;
-    font-size: 16px;
-    cursor: pointer;
-}
+        .header-titles p {
+            font-size: 13px;
+            color: #94a3b8;
+        }
 
-input[type="date"], select {
-    background: #020617;
-    color: #e5e7eb;
-    border: 1px solid #334155;
-    border-radius: 4px;
-    padding: 5px;
-}
+        /* Alerta de Atraso */
+        .alerta-atraso {
+            margin-bottom: 22px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fecaca;
+            font-weight: 600;
+            display: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            animation: pulse-border 2.5s infinite;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+        }
 
-.status.vermelho { color: #ef4444; font-weight: bold; }
-.status.azul { color: #3b82f6; font-weight: bold; }
-.status.verde { color: #22c55e; font-weight: bold; }
-.status.cinza { color: #9ca3af; font-weight: bold; }
+        .alerta-atraso-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.top {
-    display: flex;
-    justify-content: space-between;
-    max-width: 1100px;
-    margin: 0 auto 20px;
-}
+        .alerta-btn {
+            background: rgba(239, 68, 68, 0.25);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-.cards {
-    max-width: 1100px;
-    margin: 0 auto 25px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-}
+        .alerta-btn:hover {
+            background: #ef4444;
+        }
 
-.card {
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-}
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15); }
+            50% { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 4px 25px rgba(239, 68, 68, 0.3); }
+        }
 
-.card strong {
-    display: block;
-    margin-top: 6px;
-    font-size: 32px;
-}
+        /* Cards de Métricas */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
 
-.card-atraso { color: #ef4444; }
-.card-prazo { color: #3b82f6; }
-.card-ok { color: #22c55e; }
-.card-sem { color: #9ca3af; }
-.card-total { color: #07e9de; }
+        .metric-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 16px 18px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
 
-th.sortable {
-    cursor: pointer;
-    user-select: none;
-}
+        .metric-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+        }
 
-.sort-icon {
-    font-size: 10px;
-    margin-left: 6px;
-    opacity: 0.6;
-}
+        .metric-card.active-filter {
+            transform: translateY(-4px);
+            outline: 2px solid #38bdf8;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.4) !important;
+            background: rgba(15, 23, 42, 0.95);
+        }
 
-th.sort-asc .sort-icon::after {
-    content: "▲";
-}
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
 
-th.sort-desc .sort-icon::after {
-    content: "▼";
-}
+        .card-atraso-box::before { background: #ef4444; }
+        .card-prazo-box::before { background: #38bdf8; }
+        .card-ok-box::before { background: #10b981; }
+        .card-sem-box::before { background: #64748b; }
+        .card-total-box::before { background: linear-gradient(180deg, #06b6d4, #6366f1); }
 
-th.sort-asc,
-th.sort-desc {
-    color: #38bdf8;
-}
+        .metric-card:hover.card-atraso-box { box-shadow: 0 10px 25px rgba(239, 68, 68, 0.25); }
+        .metric-card:hover.card-prazo-box { box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25); }
+        .metric-card:hover.card-ok-box { box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25); }
+        .metric-card:hover.card-sem-box { box-shadow: 0 10px 25px rgba(100, 116, 139, 0.25); }
+        .metric-card:hover.card-total-box { box-shadow: 0 10px 25px rgba(6, 182, 212, 0.25); }
 
-tr.atraso {
-    background: rgba(239, 68, 68, 0.08);
-}
+        .metric-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-tr.atraso td:first-child {
-    color: #fecaca;
-    font-weight: bold;
-}
+        .metric-value {
+            font-size: 30px;
+            font-weight: 800;
+            margin-top: 8px;
+            line-height: 1;
+        }
 
-.badge-atraso {
-    margin-right: 6px;
-}
+        .val-atraso { color: #ef4444; }
+        .val-prazo { color: #38bdf8; }
+        .val-ok { color: #10b981; }
+        .val-sem { color: #94a3b8; }
+        .val-total { color: #38bdf8; }
 
-.alerta-atraso {
-    max-width: 1100px;
-    margin: 0 auto 20px;
-    padding: 14px 18px;
-    border-radius: 10px;
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid #ef4444;
-    color: #fecaca;
-    font-weight: bold;
-    display: none;
-    animation: pulse 2s infinite;
-}
+        /* Barra de Ações & Filtros */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(12px);
+            padding: 12px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
 
-.alerta-atraso strong {
-    color: white;
-}
+        .left-controls, .right-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.75; }
-    100% { opacity: 1; }
-}
+        select, input[type="text"].search-box {
+            background: #0b1329;
+            color: #f8fafc;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-</style>
+        select:focus, input[type="text"].search-box:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-action {
+            padding: 9px 15px;
+            border-radius: 10px;
+            border: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            transform: translateX(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.45);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .active-filter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #38bdf8;
+            font-size: 12px;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .active-filter-badge button {
+            background: transparent;
+            border: none;
+            color: #38bdf8;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        /* Tabela */
+        .table-container {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background: rgba(11, 19, 43, 0.9);
+            border-bottom: 2px solid #1e293b;
+        }
+
+        th {
+            padding: 15px 18px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            user-select: none;
+        }
+
+        th.sortable {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        th.sortable:hover {
+            color: #38bdf8;
+        }
+
+        .sort-icon {
+            font-size: 11px;
+            margin-left: 6px;
+            display: inline-block;
+            transition: transform 0.2s ease;
+            color: #38bdf8;
+        }
+
+        th.sort-asc .sort-icon::after { content: " ▲"; }
+        th.sort-desc .sort-icon::after { content: " ▼"; }
+
+        td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+            color: #e2e8f0;
+            vertical-align: middle;
+        }
+
+        tr {
+            transition: background-color 0.15s ease;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(56, 189, 248, 0.04);
+        }
+
+        tbody tr.atraso {
+            background-color: rgba(239, 68, 68, 0.08);
+        }
+
+        tbody tr.atraso:hover {
+            background-color: rgba(239, 68, 68, 0.14);
+        }
+
+        tbody tr.atraso td:first-child {
+            color: #fca5a5;
+        }
+
+        .badge-atraso {
+            margin-right: 6px;
+            display: inline-block;
+        }
+
+        .paciente-link {
+            color: #f8fafc;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .paciente-link:hover {
+            color: #38bdf8;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .paciente-link .info-tag {
+            opacity: 0;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            transition: opacity 0.2s ease;
+        }
+
+        tbody tr:hover .paciente-link .info-tag {
+            opacity: 1;
+        }
+
+        /* Status Pills */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .status-pill.vermelho {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-pill.azul {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .status-pill.verde {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-pill.cinza {
+            background: rgba(148, 163, 184, 0.15);
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        /* Botões de Ação na Linha */
+        .btn-table {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-table.ok {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-table.ok:hover {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            transform: scale(1.05);
+        }
+
+        .btn-table.excluir {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            margin-left: 6px;
+        }
+
+        .btn-table.excluir:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+            transform: scale(1.05);
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            vertical-align: middle;
+        }
+
+        .btn-icon:hover {
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .btn-icon.danger:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        input[type="date"].table-date {
+            background: #020617;
+            color: #f8fafc;
+            border: 1px solid #38bdf8;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        /* Toast Container */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            min-width: 280px;
+            max-width: 400px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success { border-left: 4px solid #10b981; }
+        .toast-error { border-left: 4px solid #ef4444; }
+        .toast-info { border-left: 4px solid #38bdf8; }
+
+        /* Modal Backdrop & Dialog */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 9000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            transform: scale(0.95);
+            transition: transform 0.25s ease;
+            position: relative;
+        }
+
+        .modal-backdrop.open .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .modal-header h3 {
+            font-size: 19px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Timeline de Histórico */
+        .historico-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .historico-mes-box {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .historico-mes-box:hover {
+            border-color: #38bdf8;
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .mes-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .historico-dates {
+            font-size: 11px;
+            color: #cbd5e1;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        footer a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        footer a:hover {
+            color: #7dd3fc;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            body { padding: 16px 10px; }
+            .controls-bar { flex-direction: column; align-items: stretch; }
+            .left-controls, .right-controls { width: 100%; justify-content: space-between; }
+            .cards-grid { grid-template-columns: repeat(2, 1fr); }
+            .table-container { overflow-x: auto; }
+            table { min-width: 650px; }
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            .cards-grid, .controls-bar, .right-controls, .btn-action, .btn-icon, .btn-table, footer, #alerta-atraso, #toast-container, .modal-backdrop {
+                display: none !important;
+            }
+            .table-container {
+                background: transparent !important;
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+            }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td {
+                color: #000000 !important;
+                border: 1px solid #ddd !important;
+                padding: 8px !important;
+                font-size: 12px !important;
+            }
+            thead { background: #f1f5f9 !important; }
+            .status-pill { border: 1px solid #000 !important; color: #000 !important; background: transparent !important; }
+            .paciente-link { color: #000 !important; text-decoration: none !important; }
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+        }
+        .print-header { display: none; }
+    </style>
 </head>
-
 <body>
 
-<h2>Dashboard de Retiradas - Kalina</h2>
+<div id="toast-container"></div>
 
-<div id="alerta-atraso" class="alerta-atraso">
-    ⚠️ Existem <strong id="qtd-atrasos">0</strong> retiradas em atraso.
+<div class="container">
+    <!-- Cabeçalho de Impressão -->
+    <div class="print-header">
+        <h2 style="font-size: 18pt; margin-bottom: 4px;">Sistema Kalina ™ - Relatório de Retiradas de Medicamentos</h2>
+        <p id="print-subtitulo" style="font-size: 11pt; color: #555;"></p>
+    </div>
+
+    <!-- Header -->
+    <header class="page-header">
+        <div class="brand-section">
+            <img src="/static/kalina.jpg" alt="Dra. Kalina" class="brand-avatar" onerror="this.onerror=null; this.src='https://i.ibb.co/jv0PkJyN/3.png';">
+            <div class="header-titles">
+                <h1>Dashboard de Retiradas</h1>
+                <p>Sistema Kalina ™ de Controle de Medicamentos</p>
+            </div>
+        </div>
+
+        <div class="right-controls">
+            <button class="btn-action btn-back" onclick="location.href='/'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Início
+            </button>
+            <button class="btn-action btn-secondary" onclick="exportarExcel()" title="Exportar dados do mês para planilha">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Exportar Excel
+            </button>
+            <button class="btn-action btn-secondary" onclick="imprimirRelatorio()" title="Imprimir ou Salvar em PDF">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Imprimir
+            </button>
+            <button class="btn-action btn-primary" onclick="location.href='/cadastrar-paciente'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Novo Paciente
+            </button>
+        </div>
+    </header>
+
+    <!-- Alerta de Atrasos -->
+    <div id="alerta-atraso" class="alerta-atraso" style="display:none;">
+        <div class="alerta-atraso-left">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>Atenção: Existem <strong id="qtd-atrasos">0</strong> retirada(s) em atraso neste mês!</span>
+        </div>
+        <button class="alerta-btn" onclick="filtrarPorCard('Em Atraso', document.querySelector('.card-atraso-box'))">Ver Atrasados</button>
+    </div>
+
+    <!-- Cards de Métricas (Clicáveis para filtrar) -->
+    <section class="cards-grid">
+        <div class="metric-card card-atraso-box" onclick="filtrarPorCard('Em Atraso', this)" title="Clique para filtrar apenas Em Atraso">
+            <div class="metric-title">
+                Em Atraso
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="metric-value val-atraso" id="card-atraso">0</div>
+        </div>
+
+        <div class="metric-card card-prazo-box" onclick="filtrarPorCard('Dentro do Prazo', this)" title="Clique para filtrar apenas Dentro do Prazo">
+            <div class="metric-title">
+                Dentro do Prazo
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 10"></polyline></svg>
+            </div>
+            <div class="metric-value val-prazo" id="card-prazo">0</div>
+        </div>
+
+        <div class="metric-card card-ok-box" onclick="filtrarPorCard('OK', this)" title="Clique para filtrar apenas Concluídos (OK)">
+            <div class="metric-title">
+                Concluídos (OK)
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <div class="metric-value val-ok" id="card-ok">0</div>
+        </div>
+
+        <div class="metric-card card-sem-box" onclick="filtrarPorCard('Sem Registro', this)" title="Clique para filtrar apenas Sem Registro">
+            <div class="metric-title">
+                Sem Registro
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            </div>
+            <div class="metric-value val-sem" id="card-sem">0</div>
+        </div>
+
+        <div class="metric-card card-total-box" onclick="filtrarPorCard(null, this)" title="Clique para ver Todos os Registros">
+            <div class="metric-title">
+                Total Geral
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div class="metric-value val-total" id="card-total">0</div>
+        </div>
+    </section>
+
+    <!-- Controles & Filtros -->
+    <div class="controls-bar">
+        <div class="left-controls">
+            <select id="ano" title="Selecionar Ano"></select>
+            <select id="mes" title="Selecionar Mês"></select>
+            <div id="badge-filtro-container" style="display:none;">
+                <span class="active-filter-badge">
+                    <span id="badge-filtro-texto">Filtro</span>
+                    <button onclick="filtrarPorCard(null, null)" title="Remover filtro">×</button>
+                </span>
+            </div>
+        </div>
+
+        <div class="right-controls">
+            <input type="text" id="filtro-busca" class="search-box" placeholder="🔍 Filtrar por nome..." oninput="filtrarPorTexto()">
+        </div>
+    </div>
+
+    <!-- Tabela de Pacientes -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="sortable" data-col="nome" data-type="text">Paciente <span class="sort-icon"></span></th>
+                    <th class="sortable" data-col="data_prevista" data-type="date">Data Prevista <span class="sort-icon"></span></th>
+                    <th class="sortable" data-col="data_retirada" data-type="date">Data Retirada <span class="sort-icon"></span></th>
+                    <th>Status</th>
+                    <th style="text-align: right; padding-right: 24px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        Desenvolvido por <a href="https://8april.com.br" target="_blank" rel="noopener noreferrer">8April Tech ↗</a>
+    </footer>
 </div>
 
-<div class="cards">
-    <div class="card">Em Atraso<strong id="card-atraso" class="card-atraso">0</strong></div>
-    <div class="card">Dentro do Prazo<strong id="card-prazo" class="card-prazo">0</strong></div>
-    <div class="card">OK<strong id="card-ok" class="card-ok">0</strong></div>
-    <div class="card">Sem Registro<strong id="card-sem" class="card-sem">0</strong></div>
-    <div class="card">Total Geral<strong id="card-total" class="card-total">0</strong></div>
-</div>
+<!-- Modal Histórico / Ficha do Paciente -->
+<div id="modal-historico" class="modal-backdrop" onclick="fecharModalHistorico(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Ficha do Paciente: <span id="modal-paciente-nome" style="color: #38bdf8;"></span>
+            </h3>
+            <button class="modal-close" onclick="fecharModalHistoricoDirect()">✕</button>
+        </div>
 
-<div class="top">
-    <button onclick="location.href='/'">← Voltar</button>
-    <div>
-        <select id="ano"></select>
-        <select id="mes"></select>
-        <button onclick="location.href='/cadastrar-paciente'">Novo Paciente</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+            <p style="font-size:13px; color:#94a3b8;">Histórico anual de retiradas de medicamentos:</p>
+            <select id="modal-ano-sel" onchange="carregarHistoricoAno()" style="padding: 6px 12px; font-size:13px;"></select>
+        </div>
+
+        <div class="historico-grid" id="modal-historico-grid"></div>
     </div>
 </div>
 
-<table>
-<thead>
-<tr>
-    <th class="sortable" data-col="nome" data-type="text">Nome <span class="sort-icon"></span></th>
-    <th class="sortable" data-col="data_prevista" data-type="date">Data Prevista <span class="sort-icon"></span></th>
-    <th class="sortable" data-col="data_retirada" data-type="date">Data Retirada <span class="sort-icon"></span></th>
-    <th>Status</th>
-    <th>Ações</th>
-</tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
+<!-- Modal Confirmação de Exclusão -->
+<div id="modal-confirma-exclusao" class="modal-backdrop" onclick="fecharModalExclusao()">
+    <div class="modal-card" style="max-width: 440px; text-align: center;" onclick="event.stopPropagation()">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); color:#ef4444; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        </div>
+        <h3 style="font-size: 18px; color: #ffffff; margin-bottom: 8px;">Excluir Paciente</h3>
+        <p style="font-size: 14px; color: #94a3b8; margin-bottom: 24px;">Tem certeza que deseja excluir o cadastro de <strong id="nome-paciente-excluir" style="color:#ffffff;"></strong>? Esta ação não pode ser desfeita.</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+            <button class="btn-action btn-back" style="padding: 10px 20px;" onclick="fecharModalExclusao()">Cancelar</button>
+            <button id="btn-confirmar-excluir" class="btn-action btn-table excluir" style="padding: 10px 20px; font-size:14px;">Sim, Excluir</button>
+        </div>
+    </div>
+</div>
 
 <script>
 const formatarBR = d => d ? d.split("-").reverse().join("/") : "-";
+const NOMES_MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 const tbody = document.getElementById("tbody");
 const anoSel = document.getElementById("ano");
 const mesSel = document.getElementById("mes");
 let dadosAtuais = [];
 let ordenacao = { campo: "nome", direcao: "asc" };
+let filtroStatusAtivo = null;
+let pacienteSelecionadoId = null;
+let pacienteParaExcluir = null;
 
-[2024,2025,2026].forEach(a => anoSel.add(new Option(a,a)));
-["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
-.forEach((m,i)=>mesSel.add(new Option(m,i+1)));
+// Inicializa Seletores
+[2024, 2025, 2026, 2027].forEach(a => {
+    anoSel.add(new Option(a, a));
+    const modalAno = document.getElementById("modal-ano-sel");
+    if (modalAno) modalAno.add(new Option(a, a));
+});
+
+NOMES_MESES.forEach((m, i) => mesSel.add(new Option(m, i + 1)));
 
 const hoje = new Date();
 anoSel.value = hoje.getFullYear();
-mesSel.value = hoje.getMonth()+1;
+mesSel.value = hoje.getMonth() + 1;
+document.getElementById("modal-ano-sel").value = hoje.getFullYear();
 
-anoSel.onchange = mesSel.onchange = carregar;
+anoSel.onchange = mesSel.onchange = () => {
+    filtroStatusAtivo = null;
+    atualizarCardAtivo();
+    carregar();
+};
 
+// Ordenação de colunas
 document.querySelectorAll("th.sortable").forEach(th => {
     th.addEventListener("click", () => {
         const campo = th.dataset.col;
-
         if (ordenacao.campo === campo) {
             ordenacao.direcao = ordenacao.direcao === "asc" ? "desc" : "asc";
         } else {
             ordenacao.campo = campo;
             ordenacao.direcao = "asc";
         }
-
         atualizarIcones(th);
         aplicarOrdenacao();
     });
@@ -238,48 +979,102 @@ function atualizarIcones(thAtivo) {
     document.querySelectorAll("th.sortable").forEach(th => {
         th.classList.remove("sort-asc", "sort-desc");
     });
-
     thAtivo.classList.add(
         ordenacao.direcao === "asc" ? "sort-asc" : "sort-desc"
     );
 }
 
-async function carregar() {
-    const r = await fetch(`/dashboard/?ano=${anoSel.value}&mes=${mesSel.value}`, { cache:"no-store" });
-    if (!r.ok) return;
+// Toast Notifications
+function showToast(msg, type = "success") {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    
+    let icon = "✅";
+    if (type === "error") icon = "❌";
+    if (type === "info") icon = "ℹ️";
 
-    const data = await r.json();
+    toast.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+    container.appendChild(toast);
 
-    let atraso = 0, prazo = 0, ok = 0, sem = 0;
-
-    data.dados.forEach(i => {
-        if (i.status === "Em Atraso") atraso++;
-        else if (i.status === "Dentro do Prazo") prazo++;
-        else if (i.status === "OK") ok++;
-        else if (i.status === "Sem Registro") sem++;
-    });
-
-    document.getElementById("card-atraso").textContent = atraso;
-    document.getElementById("card-prazo").textContent = prazo;
-    document.getElementById("card-ok").textContent = ok;
-    document.getElementById("card-sem").textContent = sem;
-    document.getElementById("card-total").textContent = atraso + prazo + ok + sem;
-
-    const alerta = document.getElementById("alerta-atraso");
-    const qtd = document.getElementById("qtd-atrasos");
-
-    if (atraso > 0) {
-        alerta.style.display = "block";
-        qtd.textContent = atraso;
-    } else {
-        alerta.style.display = "none";
-    }
-
-    dadosAtuais = data.dados;
-    aplicarOrdenacao();
-
+    setTimeout(() => toast.classList.add("show"), 10);
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+    }, 3200);
 }
 
+// Carregar Dados da API
+async function carregar() {
+    try {
+        const r = await fetch(`/dashboard/?ano=${anoSel.value}&mes=${mesSel.value}`, { cache: "no-store" });
+        if (!r.ok) return;
+
+        const data = await r.json();
+
+        let atraso = 0, prazo = 0, ok = 0, sem = 0;
+
+        data.dados.forEach(i => {
+            if (i.status === "Em Atraso") atraso++;
+            else if (i.status === "Dentro do Prazo") prazo++;
+            else if (i.status === "OK") ok++;
+            else if (i.status === "Sem Registro") sem++;
+        });
+
+        document.getElementById("card-atraso").textContent = atraso;
+        document.getElementById("card-prazo").textContent = prazo;
+        document.getElementById("card-ok").textContent = ok;
+        document.getElementById("card-sem").textContent = sem;
+        document.getElementById("card-total").textContent = atraso + prazo + ok + sem;
+
+        const alerta = document.getElementById("alerta-atraso");
+        const qtd = document.getElementById("qtd-atrasos");
+
+        if (atraso > 0) {
+            alerta.style.display = "flex";
+            qtd.textContent = atraso;
+        } else {
+            alerta.style.display = "none";
+        }
+
+        dadosAtuais = data.dados;
+        aplicarOrdenacao();
+    } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+        showToast("Erro ao sincronizar dados com o servidor.", "error");
+    }
+}
+
+// Filtro interativo por Card
+function filtrarPorCard(status, cardEl) {
+    if (filtroStatusAtivo === status) {
+        filtroStatusAtivo = null;
+    } else {
+        filtroStatusAtivo = status;
+    }
+    atualizarCardAtivo();
+    filtrarPorTexto();
+}
+
+function atualizarCardAtivo() {
+    document.querySelectorAll(".metric-card").forEach(c => c.classList.remove("active-filter"));
+    const badgeContainer = document.getElementById("badge-filtro-container");
+    const badgeTexto = document.getElementById("badge-filtro-texto");
+
+    if (filtroStatusAtivo) {
+        badgeContainer.style.display = "inline-block";
+        badgeTexto.textContent = `Status: ${filtroStatusAtivo}`;
+        
+        if (filtroStatusAtivo === "Em Atraso") document.querySelector(".card-atraso-box")?.classList.add("active-filter");
+        else if (filtroStatusAtivo === "Dentro do Prazo") document.querySelector(".card-prazo-box")?.classList.add("active-filter");
+        else if (filtroStatusAtivo === "OK") document.querySelector(".card-ok-box")?.classList.add("active-filter");
+        else if (filtroStatusAtivo === "Sem Registro") document.querySelector(".card-sem-box")?.classList.add("active-filter");
+    } else {
+        badgeContainer.style.display = "none";
+    }
+}
+
+// Ordenação e Filtros
 function aplicarOrdenacao() {
     const { campo, direcao } = ordenacao;
     const mult = direcao === "asc" ? 1 : -1;
@@ -301,96 +1096,303 @@ function aplicarOrdenacao() {
         return 0;
     });
 
-    renderizar(dadosAtuais);
+    filtrarPorTexto();
 }
 
+function filtrarPorTexto() {
+    const busca = (document.getElementById("filtro-busca")?.value || "").toLowerCase().trim();
+    let lista = dadosAtuais;
+
+    if (filtroStatusAtivo) {
+        lista = lista.filter(i => i.status === filtroStatusAtivo);
+    }
+
+    if (busca) {
+        lista = lista.filter(i => (i.nome || "").toLowerCase().includes(busca));
+    }
+
+    renderizar(lista);
+}
+
+// Renderizar Tabela
 function renderizar(lista) {
     tbody.innerHTML = "";
     if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="5">Nenhum registro</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum paciente ou registro encontrado para os filtros selecionados.</td></tr>`;
         return;
     }
 
     lista.forEach(i => {
-        tbody.innerHTML += `
-<tr class="${i.status === 'Em Atraso' ? 'atraso' : ''}">
-<td>
-  ${i.status === "Em Atraso" ? '<span class="badge-atraso">⚠️</span>' : ''}
-  ${i.nome}
-</td>
+        const tr = document.createElement("tr");
+        if (i.status === "Em Atraso") tr.classList.add("atraso");
 
-<td>
-  <span id="v-prev-${i.retirada_id}">${formatarBR(i.data_prevista)}</span>
-  <input type="date" id="i-prev-${i.retirada_id}" value="${i.data_prevista ?? ""}" style="display:none">
-  <button class="editar" onclick="editarPrev(${i.retirada_id})">✏️</button>
-  <button class="ok" id="s-prev-${i.retirada_id}" style="display:none" onclick="salvarPrev(${i.retirada_id})">Salvar</button>
-</td>
+        tr.innerHTML = `
+            <td>
+                <span class="paciente-link" onclick="abrirModalHistorico(${i.paciente_id}, '${escapeHtml(i.nome)}')">
+                    ${i.status === "Em Atraso" ? '<span class="badge-atraso" title="Em Atraso">⚠️</span>' : ''}
+                    <span>${i.nome}</span>
+                    <span class="info-tag">histórico</span>
+                </span>
+            </td>
 
-<td>
-  <span id="v-ret-${i.retirada_id}">${formatarBR(i.data_retirada)}</span>
-  <input type="date" id="i-ret-${i.retirada_id}" value="${i.data_retirada ?? ""}" style="display:none">
-  <button class="editar" onclick="editarRet(${i.retirada_id})">✏️</button>
-  <button class="editar" onclick="limparRet(${i.retirada_id})">🗑</button>
-</td>
+            <td>
+                <span id="v-prev-${i.retirada_id}">${formatarBR(i.data_prevista)}</span>
+                <input type="date" id="i-prev-${i.retirada_id}" class="table-date" value="${i.data_prevista ?? ""}" style="display:none">
+                <button class="btn-icon" title="Editar Data Prevista" onclick="editarPrev(${i.retirada_id})">✏️</button>
+                <button class="btn-table ok" id="s-prev-${i.retirada_id}" style="display:none" onclick="salvarPrev(${i.retirada_id})">Salvar</button>
+            </td>
 
-<td><span class="status ${i.cor}">${i.status}</span></td>
+            <td>
+                <span id="v-ret-${i.retirada_id}">${formatarBR(i.data_retirada)}</span>
+                <input type="date" id="i-ret-${i.retirada_id}" class="table-date" value="${i.data_retirada ?? ""}" style="display:none">
+                <button class="btn-icon" title="Informar Retirada" onclick="editarRet(${i.retirada_id})">✏️</button>
+                <button class="btn-icon danger" title="Limpar Retirada" onclick="limparRet(${i.retirada_id})">🗑️</button>
+            </td>
 
-<td>
-  <button class="ok" onclick="marcarOk(${i.retirada_id})">OK</button>
-  <button class="excluir" onclick="excluir(${i.paciente_id})">Excluir</button>
-</td>
-</tr>`;
+            <td>
+                <span class="status-pill ${i.cor}">${i.status}</span>
+            </td>
+
+            <td style="text-align: right; padding-right: 24px;">
+                <button class="btn-table ok" title="Marcar como Concluído" onclick="marcarOk(${i.retirada_id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    OK
+                </button>
+                <button class="btn-table excluir" title="Excluir Paciente" onclick="solicitarExclusao(${i.paciente_id}, '${escapeHtml(i.nome)}')">
+                    Excluir
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
     });
 }
 
-function editarPrev(id){
-    document.getElementById(`v-prev-${id}`).style.display="none";
-    document.getElementById(`i-prev-${id}`).style.display="inline-block";
-    document.getElementById(`s-prev-${id}`).style.display="inline-block";
+function escapeHtml(str) {
+    return (str || '').replace(/'/g, "\'").replace(/"/g, '&quot;');
 }
 
-async function salvarPrev(id){
+// Ações de Tabela
+function editarPrev(id) {
+    document.getElementById(`v-prev-${id}`).style.display = "none";
+    document.getElementById(`i-prev-${id}`).style.display = "inline-block";
+    document.getElementById(`s-prev-${id}`).style.display = "inline-block";
+}
+
+async function salvarPrev(id) {
     const v = document.getElementById(`i-prev-${id}`).value;
-    await fetch(`/retiradas/${id}/data-prevista`,{
-        method:"PUT",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ data_prevista: v || null })
-    });
-    carregar();
-}
-
-function editarRet(id){
-    document.getElementById(`v-ret-${id}`).style.display="none";
-    document.getElementById(`i-ret-${id}`).style.display="inline-block";
-}
-
-async function marcarOk(id){
-    const v = document.getElementById(`i-ret-${id}`).value;
-    if(!v) return alert("Informe a data de retirada");
-    await fetch(`/retiradas/${id}/marcar`,{
-        method:"PUT",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ data_retirada:v })
-    });
-    carregar();
-}
-
-async function limparRet(id){
-    await fetch(`/retiradas/${id}/marcar`,{
-        method:"PUT",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ data_retirada: null })
-    });
-    carregar();
-}
-
-async function excluir(id){
-    if(confirm("Excluir paciente?")){
-        await fetch(`/pacientes/${id}`,{ method:"DELETE" });
+    try {
+        await fetch(`/retiradas/${id}/data-prevista`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data_prevista: v || null })
+        });
+        showToast("Data prevista atualizada com sucesso!");
         carregar();
+    } catch (err) {
+        showToast("Erro ao salvar data prevista.", "error");
     }
 }
 
+function editarRet(id) {
+    document.getElementById(`v-ret-${id}`).style.display = "none";
+    document.getElementById(`i-ret-${id}`).style.display = "inline-block";
+}
+
+async function marcarOk(id) {
+    const inputDate = document.getElementById(`i-ret-${id}`);
+    let v = inputDate ? inputDate.value : null;
+
+    if (!v) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        v = `${yyyy}-${mm}-${dd}`;
+    }
+
+    try {
+        await fetch(`/retiradas/${id}/marcar`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data_retirada: v })
+        });
+        showToast("Retirada registrada com sucesso!");
+        carregar();
+    } catch (err) {
+        showToast("Erro ao confirmar retirada.", "error");
+    }
+}
+
+async function limparRet(id) {
+    try {
+        await fetch(`/retiradas/${id}/marcar`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data_retirada: null })
+        });
+        showToast("Data de retirada removida.", "info");
+        carregar();
+    } catch (err) {
+        showToast("Erro ao limpar retirada.", "error");
+    }
+}
+
+// Modal de Exclusão
+function solicitarExclusao(id, nome) {
+    pacienteParaExcluir = id;
+    document.getElementById("nome-paciente-excluir").textContent = nome;
+    document.getElementById("btn-confirmar-excluir").onclick = confirmarExclusao;
+    const m = document.getElementById("modal-confirma-exclusao");
+    m.style.display = "flex";
+    setTimeout(() => m.classList.add("open"), 10);
+}
+
+function fecharModalExclusao() {
+    const m = document.getElementById("modal-confirma-exclusao");
+    m.classList.remove("open");
+    setTimeout(() => m.style.display = "none", 250);
+}
+
+async function confirmarExclusao() {
+    if (!pacienteParaExcluir) return;
+    try {
+        const res = await fetch(`/pacientes/${pacienteParaExcluir}`, { method: "DELETE" });
+        if (res.ok) {
+            showToast("Paciente excluído com sucesso.");
+            fecharModalExclusao();
+            carregar();
+        } else {
+            showToast("Erro ao excluir paciente.", "error");
+        }
+    } catch (err) {
+        showToast("Erro de conexão ao excluir paciente.", "error");
+    }
+}
+
+// Modal Histórico / Ficha
+async function abrirModalHistorico(pacienteId, nome) {
+    pacienteSelecionadoId = pacienteId;
+    document.getElementById("modal-paciente-nome").textContent = nome;
+    const m = document.getElementById("modal-historico");
+    m.style.display = "flex";
+    setTimeout(() => m.classList.add("open"), 10);
+    await carregarHistoricoAno();
+}
+
+function fecharModalHistorico(e) {
+    if (e.target === document.getElementById("modal-historico")) {
+        fecharModalHistoricoDirect();
+    }
+}
+
+function fecharModalHistoricoDirect() {
+    const m = document.getElementById("modal-historico");
+    m.classList.remove("open");
+    setTimeout(() => m.style.display = "none", 250);
+}
+
+async function carregarHistoricoAno() {
+    if (!pacienteSelecionadoId) return;
+    const ano = document.getElementById("modal-ano-sel").value;
+    const grid = document.getElementById("modal-historico-grid");
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color:#94a3b8;">Carregando histórico de ${ano}...</div>`;
+
+    try {
+        const res = await fetch(`/pacientes/${pacienteSelecionadoId}/historico?ano=${ano}`);
+        if (!res.ok) throw new Error("Erro ao carregar histórico");
+        const data = await res.json();
+
+        grid.innerHTML = "";
+        
+        const mapaMeses = {};
+        data.historico.forEach(h => {
+            mapaMeses[h.mes] = h;
+        });
+
+        for (let m = 1; m <= 12; m++) {
+            const h = mapaMeses[m];
+            const box = document.createElement("div");
+            box.className = "historico-mes-box";
+
+            let statusPill = `<span class="status-pill cinza" style="font-size:10px; padding:2px 8px;">Sem Reg.</span>`;
+            let datasHtml = `<div class="historico-dates">-</div>`;
+
+            if (h) {
+                statusPill = `<span class="status-pill ${h.cor}" style="font-size:10px; padding:2px 8px;">${h.status}</span>`;
+                datasHtml = `
+                    <div class="historico-dates">
+                        <div>Prev: <strong>${formatarBR(h.data_prevista)}</strong></div>
+                        <div>Ret: <strong>${formatarBR(h.data_retirada)}</strong></div>
+                    </div>
+                `;
+            }
+
+            box.innerHTML = `
+                <div class="mes-label">${NOMES_MESES[m - 1].substring(0, 3)}</div>
+                <div>${statusPill}</div>
+                ${datasHtml}
+            `;
+
+            grid.appendChild(box);
+        }
+    } catch (err) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color:#ef4444;">Não foi possível carregar o histórico.</div>`;
+    }
+}
+
+// Exportação para Excel (CSV UTF-8 com BOM)
+function exportarExcel() {
+    if (!dadosAtuais || !dadosAtuais.length) {
+        showToast("Não há dados para exportar.", "info");
+        return;
+    }
+
+    const ano = anoSel.value;
+    const mesNome = NOMES_MESES[parseInt(mesSel.value) - 1];
+
+    let csvContent = "\uFEFF";
+    csvContent += "Nome do Paciente;Mês/Ano;Data Prevista;Data de Retirada;Status\n";
+
+    dadosAtuais.forEach(i => {
+        const nome = `"${(i.nome || '').replace(/"/g, '""')}"`;
+        const periodo = `"${mesNome}/${ano}"`;
+        const dataPrev = i.data_prevista ? formatarBR(i.data_prevista) : "-";
+        const dataRet = i.data_retirada ? formatarBR(i.data_retirada) : "-";
+        const status = `"${i.status || '-'}"`;
+
+        csvContent += `${nome};${periodo};${dataPrev};${dataRet};${status}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Relatorio_Kalina_${mesNome}_${ano}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast("Planilha gerada e baixada com sucesso!");
+}
+
+// Impressão / Salvar PDF
+function imprimirRelatorio() {
+    const ano = anoSel.value;
+    const mesNome = NOMES_MESES[parseInt(mesSel.value) - 1];
+    document.getElementById("print-subtitulo").textContent = `Mês de Referência: ${mesNome} de ${ano} — Emitido em: ${new Date().toLocaleDateString('pt-BR')}`;
+    window.print();
+}
+
+// Atalho de Teclado (ESC fecha modals)
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        fecharModalHistoricoDirect();
+        fecharModalExclusao();
+    }
+});
+
+// Inicialização
 carregar();
 </script>
 

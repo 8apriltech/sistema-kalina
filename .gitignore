@@ -1,17 +1,22 @@
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*.class
+*.so
 .env
 .venv/
 venv/
+ENV/
 
-# SQLite
+# SQLite & App Data
 *.db
 *.sqlite3
+data/
+backup/
+*.log
 
-# IDE / OS
+# IDE & OS
 .vscode/
 .idea/
 .DS_Store
+*.swp
